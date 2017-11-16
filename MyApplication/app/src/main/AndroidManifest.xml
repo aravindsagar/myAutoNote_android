@@ -9,7 +9,7 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
+		<!-- this is my first commit woot woot -emily -->
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
