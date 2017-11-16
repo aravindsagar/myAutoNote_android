@@ -7,8 +7,8 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="$USER_HOME$/Google Drive/UIUC/CS465_UIDesign/myAutoNote_android/MyApplication" />
-            <option value="$USER_HOME$/Google Drive/UIUC/CS465_UIDesign/myAutoNote_android/MyApplication/app" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
