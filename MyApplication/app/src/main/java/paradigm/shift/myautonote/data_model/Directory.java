@@ -50,4 +50,28 @@ public class Directory extends DataItem {
             throw new FileNotFoundException();
         }
     }
+
+    @Override
+    public String toString() {
+        return toString(0);
+    }
+    
+    public String toString(final int indent) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < indent; i++) {
+            sb.append(" ");
+        }
+        sb.append(myName);
+        sb.append('\n');
+        for (Directory d : mySubDirs.values()) {
+            sb.append(d.toString(indent+2));
+            sb.append('\n');
+        }
+        for (File f : myFiles.values()) {
+            sb.append(" (f) ");
+            sb.append(f.getName());
+            sb.append('\n');
+        }
+        return sb.toString();
+    }
 }

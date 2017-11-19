@@ -14,10 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
+import paradigm.shift.myautonote.data_utils.DataReader;
 
 public class MyNotes extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -49,39 +46,14 @@ public class MyNotes extends AppCompatActivity
 
         Log.d("debug", "HELLO WORLD");
         try{
-            JSONObject obj = new JSONObject(loadJSONFromAsset());
-
-            Log.d("debug", obj.getString("directory"));
+            DataReader rd = DataReader.getInstance(this);
+            Log.d("debug", rd.getTopDir().toString());
         }catch (Exception e){
             Log.d("debug", "Failer");
+            e.printStackTrace();
         }
 
 
-
-        }
-
-    public String loadJSONFromAsset() {
-        String json = null;
-        try {
-
-            InputStream is = getAssets().open("test_data.json");
-
-            int size = is.available();
-
-            byte[] buffer = new byte[size];
-
-            is.read(buffer);
-
-            is.close();
-
-            json = new String(buffer, "UTF-8");
-
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        return json;
 
     }
 

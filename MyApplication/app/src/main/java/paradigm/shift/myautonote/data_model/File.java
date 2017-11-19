@@ -18,4 +18,9 @@ public class File extends DataItem {
     public String getMyFileContents() {
         return myFileContents;
     }
+
+    @Override
+    public String toString() {
+        return getMyFileContents();
+    }
 }

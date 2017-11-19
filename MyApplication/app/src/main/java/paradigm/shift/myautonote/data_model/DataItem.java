@@ -8,11 +8,20 @@ import java.util.List;
  */
 
 public abstract class DataItem {
+
     protected final String myName;
     protected final List<String> myPathFromRoot;
 
     protected DataItem(final String name, final List<String> pathFromRoot) {
         myName = name;
         myPathFromRoot = pathFromRoot;
+    }
+
+    public String getName() {
+        return myName;
+    }
+
+    public List<String> getPathFromRoot() {
+        return myPathFromRoot;
     }
 }
