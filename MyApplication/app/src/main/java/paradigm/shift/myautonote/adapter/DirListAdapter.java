@@ -25,8 +25,6 @@ public class DirListAdapter extends BaseAdapter {
 
         ImageView imageView;
         TextView textView;
-        boolean isDir;
-        DataItem item;
 
         public ViewHolder(ImageView imageView, TextView textView) {
             this.imageView = imageView;
