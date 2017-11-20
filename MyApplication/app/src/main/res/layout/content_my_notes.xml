@@ -63,11 +63,13 @@
 
     <!-- List view for showing the directory structure.  -->
     <ListView
+        android:id="@+id/list_view_dir_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1">
     </ListView>
 
+    <!-- Buttons at bottom -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

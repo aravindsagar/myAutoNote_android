@@ -10,18 +10,19 @@ import java.util.List;
 public abstract class DataItem {
 
     protected final String myName;
-    protected final List<String> myPathFromRoot;
 
-    protected DataItem(final String name, final List<String> pathFromRoot) {
+    protected final Directory myParent;
+
+    protected DataItem(final String name, final Directory parent) {
         myName = name;
-        myPathFromRoot = pathFromRoot;
+        myParent = parent;
     }
 
     public String getName() {
         return myName;
     }
 
-    public List<String> getPathFromRoot() {
-        return myPathFromRoot;
+    public Directory getParent() {
+        return myParent;
     }
 }

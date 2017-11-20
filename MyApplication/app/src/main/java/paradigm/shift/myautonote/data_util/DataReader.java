@@ -1,4 +1,4 @@
-package paradigm.shift.myautonote.data_utils;
+package paradigm.shift.myautonote.data_util;
 
 import android.content.Context;
 
@@ -7,10 +7,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import paradigm.shift.myautonote.data_model.Directory;
@@ -21,7 +19,7 @@ import paradigm.shift.myautonote.data_model.File;
  * Created by aravind on 11/18/17.
  */
 
-public class DataReader {
+public class DataReader implements DataChangedListener {
 
     private static final String OUR_ROOT_DIR_NAME = "Home";
 
@@ -59,6 +57,7 @@ public class DataReader {
         if (myIsInvalidated || myTopDir == null) {
             try {
                 myTopDir = buildDirStructure();
+                myIsInvalidated = false;
             } catch (IOException|JSONException e) {
                 e.printStackTrace();
                 return null;
@@ -81,7 +80,7 @@ public class DataReader {
 
         // TODO: parse the data into dir structure.
         JSONObject jFiles = new JSONObject(jsonData).getJSONObject("files");
-        return buildDirectory(OUR_ROOT_DIR_NAME, jFiles, new ArrayList<String>());
+        return buildDirectory(OUR_ROOT_DIR_NAME, jFiles, null);
     }
 
     /**
@@ -89,11 +88,10 @@ public class DataReader {
      * @param jObj
      * @return
      */
-    private static Directory buildDirectory(final String name, final JSONObject jObj, final List<String> pathFromRoot) {
+    private static Directory buildDirectory(final String name, final JSONObject jObj, final Directory parent) {
         Map<String, Directory> childDirs = new HashMap<>();
         Map<String, File> childFiles = new HashMap<>();
-        List<String> childPathFromRoot = new ArrayList<>(pathFromRoot);
-        childPathFromRoot.add(name);
+        Directory curDir = new Directory(name, parent, childDirs, childFiles);
 
         Iterator<String> children = jObj.keys();
         while (children.hasNext()) {
@@ -102,13 +100,18 @@ public class DataReader {
 
             if (childObj != null) {
                 // The child is a directory, build it recursively.
-                childDirs.put(child, buildDirectory(child, childObj, childPathFromRoot));
+                childDirs.put(child, buildDirectory(child, childObj, curDir));
             } else {
                 // This child is a file. Add it to the file list.
-                childFiles.put(child, new File(child, pathFromRoot, jObj.optString(child)));
+                childFiles.put(child, new File(child, curDir, jObj.optString(child)));
             }
         }
 
-        return new Directory(name, pathFromRoot, childDirs, childFiles);
+        return curDir;
+    }
+
+    @Override
+    public void onDataChanged() {
+        myIsInvalidated = true;
     }
 }

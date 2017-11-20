@@ -10,8 +10,8 @@ public class File extends DataItem {
 
     private final String myFileContents;
 
-    public File(final String name, final List<String> pathFromRoot, String fileContents) {
-        super(name, pathFromRoot);
+    public File(final String name, final Directory parent, final String fileContents) {
+        super(name, parent);
         this.myFileContents = fileContents;
     }
 

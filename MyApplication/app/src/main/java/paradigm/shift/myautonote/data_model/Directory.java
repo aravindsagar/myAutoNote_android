@@ -16,9 +16,9 @@ public class Directory extends DataItem {
     private final Map<String, Directory> mySubDirs;
     private final Map<String, File> myFiles;
 
-    public Directory(final String name, final List<String> pathFromRoot,
+    public Directory(final String name, final Directory parent,
                      final Map<String, Directory> subDirs, final Map<String, File> files) {
-        super(name, pathFromRoot);
+        super(name, parent);
         mySubDirs = subDirs;
         myFiles = files;
     }
@@ -35,20 +35,12 @@ public class Directory extends DataItem {
         return fileNames;
     }
 
-    public Directory getSubDirectory(final String dirName) throws FileNotFoundException {
-        if (mySubDirs.containsKey(dirName)) {
-            return mySubDirs.get(dirName);
-        } else {
-            throw new FileNotFoundException();
-        }
+    public Directory getSubDirectory(final String dirName) {
+        return mySubDirs.get(dirName);
     }
 
-    public File getFile(final String fileName) throws FileNotFoundException {
-        if (myFiles.containsKey(fileName)) {
-            return myFiles.get(fileName);
-        } else {
-            throw new FileNotFoundException();
-        }
+    public File getFile(final String fileName) {
+        return myFiles.get(fileName);
     }
 
     @Override
