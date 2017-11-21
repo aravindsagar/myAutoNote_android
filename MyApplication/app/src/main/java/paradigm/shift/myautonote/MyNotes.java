@@ -1,8 +1,10 @@
 package paradigm.shift.myautonote;
 
 import android.animation.ObjectAnimator;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -12,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -21,7 +24,8 @@ import paradigm.shift.myautonote.data_util.DataReader;
 
 public class MyNotes extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        AdapterView.OnItemClickListener {
+        AdapterView.OnItemClickListener,
+        AdapterView.OnItemLongClickListener {
 
     private ListView myDirList;
     private DirListAdapter myDirListAdapter;
@@ -58,7 +62,7 @@ public class MyNotes extends AppCompatActivity
         myDirListAdapter = new DirListAdapter(this, rd.getTopDir());
         myDirList.setAdapter(myDirListAdapter);
         myDirList.setOnItemClickListener(this);
-
+        myDirList.setOnItemLongClickListener(this);
     }
 
     @Override
@@ -76,7 +80,7 @@ public class MyNotes extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.my_notes, menu);
+//        getMenuInflater().inflate(R.menu.my_notes, menu);
 
         //Link MyNotes to Search button
         getMenuInflater().inflate(R.menu.menu_search, menu);
@@ -145,4 +149,13 @@ public class MyNotes extends AppCompatActivity
     }
 
 
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        final Dialog bottomDialog = new Dialog(this, R.style.MaterialDialogSheet);
+        bottomDialog.getWindow().setContentView(R.layout.options_pop_up);
+        bottomDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        bottomDialog.getWindow().setGravity(Gravity.BOTTOM);
+        bottomDialog.show();
+        return true;
+    }
 }
