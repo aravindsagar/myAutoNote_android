@@ -1,49 +1,65 @@
 package paradigm.shift.myautonote;
 
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 
+import org.json.JSONException;
+
+import java.io.IOException;
 import java.util.List;
 
 import paradigm.shift.myautonote.adapter.CurPathAdapter;
 import paradigm.shift.myautonote.adapter.CurPathItemClickListener;
 import paradigm.shift.myautonote.adapter.DirListAdapter;
+import paradigm.shift.myautonote.adapter.EditFinishedListener;
+import paradigm.shift.myautonote.data_model.DataItem;
 import paradigm.shift.myautonote.data_model.Directory;
+import paradigm.shift.myautonote.data_util.DataChangedListener;
 import paradigm.shift.myautonote.data_util.DataReader;
+import paradigm.shift.myautonote.data_util.DataWriter;
 
 public class MyNotes extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,
-        AdapterView.OnItemClickListener,
-        AdapterView.OnItemLongClickListener, CurPathItemClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemClickListener,
+        AdapterView.OnItemLongClickListener, CurPathItemClickListener, View.OnClickListener, DataChangedListener, EditFinishedListener {
+
+    private enum State {
+        NORMAL, CREATING, RENAMING
+    }
 
     private ListView myDirList;
     private DirListAdapter myDirListAdapter;
     private LinearLayout mySuggestionsLayout;
     private RecyclerView myCurPathView;
     private CurPathAdapter myCurPathAdapter;
+    private State myState = State.NORMAL;
+    private int myEditPosition = -1;
+    private String myLastLongpressName;
+    private Dialog myBottomDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,19 +78,10 @@ public class MyNotes extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        Log.d("debug", "HELLO WORLD");
-        DataReader rd;
-        try{
-            rd = DataReader.getInstance(this);
-            Log.d("debug", rd.getTopDir().toString());
-        }catch (Exception e){
-            Log.d("debug", "Failer");
-            e.printStackTrace();
-            return;
-        }
+        DataReader.getInstance(this).registerListener(this);
 
         myDirList = (ListView) findViewById(R.id.list_view_dir_list);
-        myDirListAdapter = new DirListAdapter(this, rd.getTopDir());
+        myDirListAdapter = new DirListAdapter(this);
         myDirList.setAdapter(myDirListAdapter);
         myDirList.setOnItemClickListener(this);
         myDirList.setOnItemLongClickListener(this);
@@ -88,6 +95,9 @@ public class MyNotes extends AppCompatActivity
         dividerItemDecoration.setDrawable(getResources().getDrawable(R.drawable.ic_chevron_right_black_24dp));
         myCurPathView.setLayoutManager(mLayoutManager);
         myCurPathView.addItemDecoration(dividerItemDecoration);
+
+        Button newFolderBtn = findViewById(R.id.btn_new_folder);
+        newFolderBtn.setOnClickListener(this);
     }
 
     /**
@@ -175,6 +185,12 @@ public class MyNotes extends AppCompatActivity
     @SuppressLint("StaticFieldLeak")
     @Override
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+        if (myState != State.NORMAL) {
+            Log.d("MyNotes", "Not acting on press");
+            return;
+        }
+
+        Log.d("MyNotes", "Acting on press");
         new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -209,12 +225,23 @@ public class MyNotes extends AppCompatActivity
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        final Dialog bottomDialog = new Dialog(this, R.style.MaterialDialogSheet);
-        bottomDialog.getWindow().setContentView(R.layout.options_pop_up);
-        bottomDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        bottomDialog.getWindow().setGravity(Gravity.BOTTOM);
-//        bottomDialog.findViewById()
-        bottomDialog.show();
+        if (myState != State.NORMAL) {
+            Log.d("MyNotes", "Not acting on long press");
+            return false;
+        }
+
+        Log.d("MyNotes", "Acting on long press");
+        myEditPosition = position;
+        myLastLongpressName = ((DataItem) myDirListAdapter.getItem(position)).getName();
+
+        myBottomDialog = new Dialog(this, R.style.MaterialDialogSheet);
+        myBottomDialog.getWindow().setContentView(R.layout.options_pop_up);
+        myBottomDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        myBottomDialog.getWindow().setGravity(Gravity.BOTTOM);
+        myBottomDialog.findViewById(R.id.btn_rename).setOnClickListener(this);
+        myBottomDialog.findViewById(R.id.btn_move).setOnClickListener(this);
+        myBottomDialog.findViewById(R.id.btn_delete).setOnClickListener(this);
+        myBottomDialog.show();
         return true;
     }
 
@@ -232,5 +259,95 @@ public class MyNotes extends AppCompatActivity
 
         myCurPathAdapter.setDataset(myDirListAdapter.getCurPath());
         myCurPathAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_new_folder :
+                myState = State.CREATING;
+                String newName = getUnusedNewDirName(myDirListAdapter.getCurDir());
+                myDirListAdapter.getDirs().add(newName);
+                myEditPosition = myDirListAdapter.getDirs().size() - 1;
+                myDirListAdapter.setEditable(myEditPosition, this);
+                myDirListAdapter.notifyDataSetChanged();
+                myDirList.setSelection(myEditPosition);
+                setSoftKeyboard(true);
+                break;
+
+            case R.id.btn_rename :
+                myBottomDialog.dismiss();
+                myState = State.RENAMING;
+                myDirListAdapter.setEditable(myEditPosition, this);
+                myDirListAdapter.notifyDataSetChanged();
+                myDirList.setSelection(myEditPosition);
+                setSoftKeyboard(true);
+                break;
+            case R.id.btn_delete :
+                myBottomDialog.dismiss();
+                try {
+                    DataWriter.getInstance(this).editFolder(myDirListAdapter.getCurPath(), myLastLongpressName, null);
+                    Snackbar.make(findViewById(R.id.parent_layout), "'" + myLastLongpressName + "' deleted", Snackbar.LENGTH_SHORT);
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                    Snackbar.make(findViewById(R.id.parent_layout), "Error deleting item", Snackbar.LENGTH_SHORT);
+                }
+                break;
+            case R.id.btn_move :
+                break;
+        }
+
+    }
+
+    private String getUnusedNewDirName(Directory d) {
+        String st = "New folder";
+        String unused = st;
+        int i = 0;
+        while (d.getSubDirectory(unused) != null) {
+            i++;
+            unused = st + " " + i;
+        }
+        return unused;
+    }
+
+    @Override
+    public void onDataChanged() {
+        myDirListAdapter.refreshTopDir();
+        setCurDirPathView();
+    }
+
+    @Override
+    public void onEditFinished(int position, String newText) {
+        if (myState == State.CREATING) {
+            try {
+                DataWriter.getInstance(this).addFolder(myDirListAdapter.getCurPath(), newText);
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                Snackbar.make(findViewById(R.id.parent_layout), "Error creating folder", Snackbar.LENGTH_SHORT);
+            }
+        } else if (myState == State.RENAMING) {
+            try {
+                DataWriter.getInstance(this).editFolder(myDirListAdapter.getCurPath(), myLastLongpressName, newText);
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+                Snackbar.make(findViewById(R.id.parent_layout), "Error renaming folder", Snackbar.LENGTH_SHORT);
+            }
+        }
+
+        myState = State.NORMAL;
+        myEditPosition = -1;
+        setSoftKeyboard(true);
+    }
+
+    private void setSoftKeyboard(boolean hidden) {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (hidden) {
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            } else {
+                imm.showSoftInput(view, 0);
+            }
+        }
     }
 }

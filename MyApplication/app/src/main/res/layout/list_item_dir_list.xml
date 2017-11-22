@@ -19,6 +19,7 @@
         android:id="@+id/dir_list_name_edit"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:singleLine="true"
         android:layout_weight="1"
         android:visibility="gone"/>
 </LinearLayout>

@@ -1,13 +1,20 @@
 package paradigm.shift.myautonote.data_util;
 
 import android.content.Context;
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import paradigm.shift.myautonote.data_model.Directory;
 
 /**
  * Created by aravind on 11/21/17.
@@ -56,6 +63,64 @@ public class DataWriter {
         // once this method returns.
     }
 
+    /**
+     * Creates a new folder in the given destination.
+     */
+    public void addFolder(final List<Directory> dir, final String newDirName) throws IOException, JSONException {
+        Log.d("DataWriter", "Creating new folder " + newDirName);
+        File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
+        JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
+        JSONObject jDir = jsonObject.getJSONObject("files");
+        for (int i = 1; i < dir.size(); i++) {
+            jDir = jDir.getJSONObject(dir.get(i).getName());
+        }
+        jDir.put(newDirName, new JSONObject());
+        writeData(jsonObject.toString());
+        notifyDataReader();
+    }
+
+    /**
+     * Renames the requested folder. If destination is null, deletes the folder.
+     */
+    public void editFolder(final List<Directory> dir, final String source, final String destination) throws IOException, JSONException {
+        Log.d("DataWriter", "Renaming folder " + source);
+        File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
+        JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
+        JSONObject jDir = jsonObject.getJSONObject("files");
+        for (int i = 1; i < dir.size(); i++) {
+            jDir = jDir.getJSONObject(dir.get(i).getName());
+        }
+
+        if (destination != null) {
+            jDir.put(destination, jDir.getJSONObject(source));
+        }
+        if (!source.equals(destination)) {
+            jDir.remove(source);
+        }
+        writeData(jsonObject.toString());
+        notifyDataReader();
+    }
+
+    /**
+     * Creates a new folder in the given destination.
+     */
+    public void addFile(final List<Directory> dir, final String newDirName) {
+
+    }
+
+    /**
+     * Renames the requested folder. If destination is null, deletes the folder.
+     */
+    public void editFile(final List<Directory> dir, final String source, final String destination) {
+
+    }
+
+    private void writeData(String data) throws IOException {
+        File outFile = new File(myContext.getFilesDir(), DATA_FILE);
+        FileOutputStream outputStream = new FileOutputStream(outFile);
+        outputStream.write(data.getBytes());
+        outputStream.close();
+    }
     private void notifyDataReader() {
         DataReader.getInstance(myContext).invalidateData();
     }

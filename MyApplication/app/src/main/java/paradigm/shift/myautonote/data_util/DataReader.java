@@ -79,6 +79,20 @@ public class DataReader {
     }
 
     /**
+     * Returns a JSONObject containing data inside our data file.
+     */
+    JSONObject readDataFile(java.io.File dataFile) throws IOException, JSONException {
+
+        FileInputStream iStream = new FileInputStream(dataFile);
+        int size = iStream.available();
+        byte[] buffer = new byte[size];
+        iStream.read(buffer);
+        iStream.close();
+        String jsonData = new String(buffer, "UTF-8");
+        return new JSONObject(jsonData);
+    }
+
+    /**
      * Build the directory structure from our stored data.
      */
     private Directory buildDirStructure() throws IOException, JSONException {
@@ -92,15 +106,7 @@ public class DataReader {
             // The file should exist now.
             return buildDirStructure();
         }
-        FileInputStream iStream = new FileInputStream(dataFile);
-        int size = iStream.available();
-        byte[] buffer = new byte[size];
-        iStream.read(buffer);
-        iStream.close();
-        String jsonData = new String(buffer, "UTF-8");
-
-        JSONObject jFiles = new JSONObject(jsonData).getJSONObject("files");
-        return buildDirectory(OUR_ROOT_DIR_NAME, jFiles, null);
+        return buildDirectory(OUR_ROOT_DIR_NAME, readDataFile(dataFile).getJSONObject("files"), null);
     }
 
     /**
