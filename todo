@@ -4,3 +4,5 @@ Undo option for delete
 Integrate folder view and note editing
 Move note into another folder
 Snackbar is not showing up currently due to some unknown reason. Debug and fix.
+New folder/rename item- add textwatcher and update listview dataset on each change.
+

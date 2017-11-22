@@ -45,7 +45,8 @@ import paradigm.shift.myautonote.data_util.DataWriter;
 
 public class MyNotes extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemClickListener,
-        AdapterView.OnItemLongClickListener, CurPathItemClickListener, View.OnClickListener, DataChangedListener, EditFinishedListener {
+        AdapterView.OnItemLongClickListener, CurPathItemClickListener, View.OnClickListener,
+        DataChangedListener, EditFinishedListener {
 
     private enum State {
         NORMAL, CREATING, RENAMING
@@ -336,16 +337,17 @@ public class MyNotes extends AppCompatActivity
 
         myState = State.NORMAL;
         myEditPosition = -1;
-        setSoftKeyboard(true);
+        setSoftKeyboard(false);
     }
 
-    private void setSoftKeyboard(boolean hidden) {
+    private void setSoftKeyboard(boolean show) {
         View view = this.getCurrentFocus();
         if (view != null) {
             InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (hidden) {
+            if (!show) {
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             } else {
+                Log.d("MyNotes", "Showing soft keyboard");
                 imm.showSoftInput(view, 0);
             }
         }
