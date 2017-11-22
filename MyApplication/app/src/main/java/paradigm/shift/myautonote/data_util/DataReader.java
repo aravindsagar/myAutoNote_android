@@ -1,31 +1,38 @@
 package paradigm.shift.myautonote.data_util;
 
 import android.content.Context;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.File;
+
+import static paradigm.shift.myautonote.data_util.DataWriter.DATA_FILE;
 
 /**
  * Utility class to parse a json data file and provide access to data in it.
  * Created by aravind on 11/18/17.
  */
 
-public class DataReader implements DataChangedListener {
+public class DataReader {
 
     private static final String OUR_ROOT_DIR_NAME = "Home";
 
     private boolean myIsInvalidated = true;
     private Directory myTopDir;
     private Context myContext;
+    private List<DataChangedListener> myListeners;
 
     private static DataReader myInstance;
 
@@ -36,6 +43,7 @@ public class DataReader implements DataChangedListener {
      */
     private DataReader(final Context context) {
         myContext = context;
+        myListeners = new ArrayList<>(2);
     }
 
     /**
@@ -66,19 +74,31 @@ public class DataReader implements DataChangedListener {
         return myTopDir;
     }
 
+    public void registerListener(DataChangedListener listener) {
+        myListeners.add(listener);
+    }
+
     /**
      * Build the directory structure from our stored data.
      */
     private Directory buildDirStructure() throws IOException, JSONException {
-        // Read the file and parse it.
-        InputStream iStream = myContext.getAssets().open("test_data.json"); // TODO: replace with stored file.
+        // Read the data file and parse it.
+        java.io.File dataFile = new java.io.File(myContext.getFilesDir(), DATA_FILE);
+        if (!dataFile.exists()) {
+            // Data file not found, create a new one.
+            Log.d("DataReader", "Data file not found, creating a new file.");
+            DataWriter.getInstance(myContext).createDataFile();
+
+            // The file should exist now.
+            return buildDirStructure();
+        }
+        FileInputStream iStream = new FileInputStream(dataFile);
         int size = iStream.available();
         byte[] buffer = new byte[size];
         iStream.read(buffer);
         iStream.close();
         String jsonData = new String(buffer, "UTF-8");
 
-        // TODO: parse the data into dir structure.
         JSONObject jFiles = new JSONObject(jsonData).getJSONObject("files");
         return buildDirectory(OUR_ROOT_DIR_NAME, jFiles, null);
     }
@@ -110,8 +130,15 @@ public class DataReader implements DataChangedListener {
         return curDir;
     }
 
-    @Override
-    public void onDataChanged() {
+    /**
+     * Called by DataWriter when it has written some data.
+     */
+    void invalidateData() {
         myIsInvalidated = true;
+        for (DataChangedListener l : myListeners) {
+            if (l != null) {
+                l.onDataChanged();
+            }
+        }
     }
 }

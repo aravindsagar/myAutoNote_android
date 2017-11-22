@@ -7,6 +7,7 @@
 
     <!-- Linear layout for 3 suggestions at top. -->
     <LinearLayout
+        android:id="@+id/suggestion_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -52,20 +53,19 @@
 
     </LinearLayout>
 
-    <!-- Linear layout for current directory path. -->
-    <LinearLayout
+    <!-- Horizontal list for current directory path. -->
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/cur_path_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="invisible"
-        android:orientation="horizontal">
-        <!-- Will add elements dynamically at runtime. -->
-    </LinearLayout>
+        android:scrollbars="horizontal"
+        android:visibility="gone" />
 
     <!-- List view for showing the directory structure.  -->
     <ListView
         android:id="@+id/list_view_dir_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1">
     </ListView>
 
@@ -90,8 +90,7 @@
             android:layout_weight="1"
             android:drawableStart="@drawable/ic_action_new_file"
             android:text="@string/new_note"
-            style="@style/NewButton"
-            />
+            style="@style/NewButton" />
     </LinearLayout>
 
 

@@ -9,6 +9,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import paradigm.shift.myautonote.R;
@@ -34,6 +35,7 @@ public class DirListAdapter extends BaseAdapter {
 
     private final Directory myTopDir;
     private Directory myCurDir;
+    private List<Directory> myCurPath;
     private List<String> myDirs;
     private List<String> myFiles;
     private final LayoutInflater inflater;
@@ -41,14 +43,21 @@ public class DirListAdapter extends BaseAdapter {
     public DirListAdapter(final Context context, final Directory topDir){
         myTopDir = topDir;
         setCurDir(myTopDir);
+        myCurPath = new ArrayList<>();
+        myCurPath.add(myTopDir);
         inflater = LayoutInflater.from(context);
     }
 
-    private void setCurDir(Directory curDir) {
+    private void setCurDir(final Directory curDir) {
         myCurDir = curDir;
         myDirs = curDir.getSubdirectoryNames();
         myFiles = curDir.getFileNames();
         notifyDataSetChanged();
+    }
+
+    public void setCurDir(final Directory curDir, final List<Directory> curPath) {
+        setCurDir(curDir);
+        myCurPath = curPath;
     }
 
     @Override
@@ -108,6 +117,7 @@ public class DirListAdapter extends BaseAdapter {
     public boolean goBack() {
         if (myCurDir.getParent() != null) {
             setCurDir(myCurDir.getParent());
+            myCurPath.remove(myCurPath.size()-1);
             return true;
         }
         return false;
@@ -117,8 +127,17 @@ public class DirListAdapter extends BaseAdapter {
         final DataItem item = (DataItem) getItem(position);
         if (item instanceof Directory) {
             setCurDir((Directory) item);
+            myCurPath.add((Directory) item);
         } else {
             //TODO: intent to open note edit activity.
         }
+    }
+
+    public boolean isInTopDir() {
+        return myCurDir == myTopDir;
+    }
+
+    public List<Directory> getCurPath() {
+        return myCurPath;
     }
 }

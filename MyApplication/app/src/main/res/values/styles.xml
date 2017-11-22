@@ -22,6 +22,8 @@
     </style>
     <style name="NewButton" parent="@android:style/Widget.Button">
         <item name="android:background">@color/colorAccent</item>
+        <item name="android:foreground">?android:attr/selectableItemBackground</item>
+        <item name="android:minWidth">0dp</item>
         <item name="android:paddingStart">10dp</item>
         <item name="android:paddingEnd">10dp</item>
         <item name="android:textColor">@android:color/white</item>

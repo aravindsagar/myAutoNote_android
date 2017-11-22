@@ -11,7 +11,14 @@
         android:layout_margin="15dp"/>
     <TextView
         android:id="@+id/dir_list_name"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="16sp"/>
+        android:textSize="16sp"
+        android:layout_weight="1"/>
+    <EditText
+        android:id="@+id/dir_list_name_edit"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:visibility="gone"/>
 </LinearLayout>
