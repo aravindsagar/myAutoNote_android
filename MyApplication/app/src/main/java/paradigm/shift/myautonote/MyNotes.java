@@ -3,6 +3,7 @@ package paradigm.shift.myautonote;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -186,6 +187,15 @@ public class MyNotes extends AppCompatActivity
     @SuppressLint("StaticFieldLeak")
     @Override
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+        final DataItem item = (DataItem) myDirListAdapter.getItem(position);
+        if (!(item instanceof Directory)) {
+            Intent intent = new Intent(this, WorkActivity.class);
+            intent.putExtra("note_title", item.getName());
+            intent.putExtra("note_content", item.getName());
+
+            startActivity(intent);
+
+        }
         if (myState != State.NORMAL) {
             Log.d("MyNotes", "Not acting on press");
             return;

@@ -4,4 +4,8 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorSuggestion">#515151</color>
+    <color name="textHeaderColor">#1565C0</color>
+    <color name="textColor">#555555</color>
+    <color name="textHighlight">#fff9b5</color>
+    <color name="textNoHighlight">#FFFFFF</color>
 </resources>
