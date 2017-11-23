@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.text.Html;
+import android.util.Log;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -17,8 +18,8 @@ import paradigm.shift.myautonote.R;
 public class LineObject {
 
     public int index;
-    private String content;
-    public int headerSize;
+    public String content;
+    public int headerSize = 0;
     public int vocab = -1;
 
     public int pad1 = 0;
@@ -38,21 +39,64 @@ public class LineObject {
 
         working = w;
 
-        isHeader();
-        isTitle();
+
 
 
 
     }
 
+    public void copyPaddingFromPreviousLine(LineObject other){
+        if(other == null){
+            pad1 = 0;
+            pad2 = 0;
+            pad3 = 0;
+        }else{
+            pad1 = other.pad1;
+            pad2 = other.pad2;
+            pad3 = other.pad3;
+        }
+
+    }
+
+    public void setPadding(int p1, int p2, int p3){
+        pad1 = p1;
+        pad2 = p2;
+        pad3 = p3;
+    }
+
+    public void endWork(TextView view){
+        view.setBackgroundColor(0x00000000);
+        working = false;
+    }
+
+
+
     public void printLineObject(Context context, TextView output){
+        headerSize = 0;
+        vocab = -1;
+
+        isHeader();
+        isTitle();
+
+
+        //valueTV.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        //valueTV.setTextSize(16);
+        //valueTV.setPadding(50,0,0,0);
+        //valueTV.setTypeface(Typeface.DEFAULT_BOLD);
 
         int [] fontSizeTypes = { 14, 22, 20, 18, 17, 17, 17 };
+
+
 
         int color = R.color.textColor;
         double opacity = 1;
 
-        if(content.trim().length() > 0){
+        if(content.trim().length() == 0){
+            if(working){
+                output.setText("new line");
+                output.setTypeface(null, Typeface.ITALIC);
+            }
+        }else {
 
             if (headerSize > 0) {
                 color = R.color.textHeaderColor;
@@ -75,6 +119,8 @@ public class LineObject {
 
                 output.setTypeface(null, Typeface.BOLD);
                 output.setAlpha((float)opacity);
+            }else{
+                output.setTypeface(null, Typeface.NORMAL);
             }
 
         }
@@ -84,7 +130,6 @@ public class LineObject {
         }
         output.setTextColor(ContextCompat.getColor(context, color));
         output.setTextSize(fontSizeTypes[headerSize]);
-        String finalString = "" + headerSize + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
         int paddingLeft = 0;
         int paddingTop = 0;
         if(headerSize > 0){
@@ -99,12 +144,7 @@ public class LineObject {
             paddingLeft += pad1+pad2+pad3;
 
         output.setPadding(paddingLeft*15,paddingTop, 0, 0);
-
-        if(content.length() == 0 && working){
-            output.setText("new line");
-            output.setTypeface(null, Typeface.ITALIC);
-        }else
-            output.setText(Html.fromHtml(content));
+        output.setText(Html.fromHtml(content));
 
         if(headerSize == 1)
             pad3 = 5;
@@ -123,6 +163,7 @@ public class LineObject {
         if(hs > 6)
             hs =  6;
         headerSize = hs;
+        Log.v("header1", ""+headerSize);
     }
 
 
@@ -133,32 +174,33 @@ public class LineObject {
 
         if(headerSize == 0 && vocab == -1){
 
-        words = content.split(" ");
-        score = 0;
-        for(int i = 0; i < words.length; i++){
-            if(words[i].length() > 0)
-                score = (this.isWordUperCase(words[i])|| this.containsIntegers(words[i]) ? score+1 : score);
+            words = content.split(" ");
+            score = 0;
+            for(int i = 0; i < words.length; i++){
+                if(words[i].length() > 0)
+                    score = (this.isWordUperCase(words[i])|| this.containsIntegers(words[i]) ? score+1 : score);
+            }
+            if((double)score/words.length >= 0.6){
+                //if(nextIsHeader)
+                //data.headerSize = 3;
+                //  else
+                if(pad3 > 0){
+                    if(pad2 > 0)
+                        headerSize = 2;
+                    else
+                        headerSize = 2;
+
+                }else
+                    headerSize = 3;
+
+
+
+                //data.headerSize = 2;
+
+            }
+
         }
-        if(score/words.length >= 0.6){
-            //if(nextIsHeader)
-            //data.headerSize = 3;
-            //  else
-            if(pad3 > 0){
-                if(pad2 > 0)
-                    headerSize = 2;
-                else
-                    headerSize = 2;
-
-            }else
-                headerSize = 3;
-
-
-
-            //data.headerSize = 2;
-
-        }
-
-        }
+        Log.v("header", ""+headerSize);
 
     }
 

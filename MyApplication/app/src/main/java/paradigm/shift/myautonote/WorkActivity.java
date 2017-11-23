@@ -2,18 +2,25 @@ package paradigm.shift.myautonote;
 
 import android.graphics.Typeface;
 import android.os.Handler;
+import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Html;
+import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -28,12 +35,12 @@ import java.util.Arrays;
 import paradigm.shift.myautonote.data_model.LineObject;
 
 import static android.support.v4.view.ViewCompat.setOverScrollMode;
-import static android.view.View.OVER_SCROLL_ALWAYS;
 import static android.view.View.OVER_SCROLL_IF_CONTENT_SCROLLS;
 
-public class WorkActivity extends AppCompatActivity {
+public class WorkActivity extends AppCompatActivity{
 
-    private ArrayList<String> content;
+    private String[] content;
+    private ArrayList<LineObject> lineData;
 
     private int pad1 = 0;
     private int pad2 = 0;
@@ -44,6 +51,7 @@ public class WorkActivity extends AppCompatActivity {
     private TextView currentLine;
     private int workingIndex = 0;
     private EditText editor;
+    private int editorOffset = 0;
     private boolean switchLine = false;
 
     @Override
@@ -51,64 +59,53 @@ public class WorkActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
 
+        //TODO- does not work
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-
-        String result = getIntent().getStringExtra("note_title");
-
-//        TextView testViewer = (TextView) findViewById(R.id.test_viewer);
-//        testViewer.setText(getIntent().getStringExtra("note_content"));
-//        setTitle(result);
+        setTitle(getIntent().getStringExtra("note_title"));
 
         formattedViewer = (LinearLayout) findViewById(R.id.formatted_viewer);
         scrollView = (ScrollView) findViewById(R.id.scrollable_viewer);
-        scrollView.setOverScrollMode(OVER_SCROLL_ALWAYS);
+
 
         String givenData = getIntent().getStringExtra("note_content");
         if(givenData.length() > 0){
-            content = new ArrayList<String>(Arrays.asList(givenData.split("<p>")));
-            for(int i = 1; i < content.size(); i++){
+            content = givenData.split("<p>");
+            lineData = new ArrayList<LineObject>();
+            for(int i = 1; i < content.length; i++){
 
-                TextView newView = new TextView(this);
-                newView.setId(i);
-                newView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                TextView newView = createNewTextView(i-1);
 
                 String parsableText = "";
-                if(content.get(i).length() > 4 && content.get(i).substring(content.get(i).length()-4).equals("</p>"))
-                    parsableText =content.get(i).substring(0, content.get(i).length()-4);
+                if(content[i].length() > 4 && content[i].substring(content[i].length()-4).equals("</p>"))
+                    parsableText = content[i].substring(0, content[i].length()-4);
                 else
-                    parsableText = content.get(i);
+                    parsableText = content[i];
 
-                LineObject lo = new LineObject(i, parsableText, pad1, pad2, pad3, false);
+                LineObject lo = new LineObject(i-1, parsableText, pad1, pad2, pad3, false);
                 lo.printLineObject(this, newView);
                 setPadding(lo);
-
+                lineData.add(lo);
                 formattedViewer.addView(newView);
-                newView.setOnClickListener(onClickLineListener);
+
             }
         }
 
-        currentLine = new TextView(this);
-        currentLine.setId(content.size());
-        currentLine.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        content.add("");
-        workingIndex = content.size()-1;
-        LineObject lo = new LineObject(content.size()-1, "", pad1, pad2, pad3, true);
-        //currentLine.setBackgroundColor(ContextCompat.getColor(this, R.color.textHighlight));
-        //currentLine.setText("new line");
-       // currentLine.setTypeface(null, Typeface.ITALIC);
+        workingIndex = lineData.size();
 
+        currentLine = createNewTextView(workingIndex);
+
+
+        LineObject lo = new LineObject(workingIndex, "", pad1, pad2, pad3, true);
         lo.printLineObject(this, currentLine);
         setPadding(lo);
-        currentLine.setOnClickListener(onClickLineListener);
+        lineData.add(lo);
         formattedViewer.addView(currentLine);
 
-
-
         editor = (EditText) findViewById(R.id.edit_box);
-
         editor.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -118,12 +115,12 @@ public class WorkActivity extends AppCompatActivity {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        //Do something after 100ms
-                        scrollView.scrollTo(0, (int)currentLine.getY());
-                        //scrollView.fullScroll(View.FOCUS_DOWN);
+                        if((currentLine.getY()+currentLine.getHeight()) > (scrollView.getScrollY()+scrollView.getHeight()) || currentLine.getY() < scrollView.getScrollY()){
+                            if((int)currentLine.getY() > 0)
+                                scrollView.smoothScrollTo(0, (int)currentLine.getY()-scrollView.getHeight()/2);
+                        }
                     }
                 }, 100);
-
             }
         });
 
@@ -131,78 +128,56 @@ public class WorkActivity extends AppCompatActivity {
         editor.addTextChangedListener(new TextWatcher() {
 
             public void afterTextChanged(Editable s) {}
-
             public void beforeTextChanged(CharSequence s, int start,
-                                          int count, int after) {
-
-            }
+                                          int count, int after) {}
 
             public void onTextChanged(CharSequence s, int start,
                                       int before, int count) {
                 if(!switchLine){
-                    if(s.toString().indexOf("\n") != -1){
+                    if(s.length() > 0 && s.toString().indexOf("\n") == s.length()-1){
                         switchLine = true;
-                        currentLine.setBackgroundColor(0x00000000);
-                        if(content.get(workingIndex).length() == 0 || editor.getText().toString().length() == 0){
-                            formattedViewer.removeView(currentLine);
 
-                            currentLine = new TextView(WorkActivity.this);
-                            currentLine.setId(workingIndex);
-                            currentLine.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                            currentLine.setText("");
-                            LineObject lo = new LineObject(workingIndex, "", pad1, pad2, pad3, false);
-                            lo.printLineObject(WorkActivity.this, currentLine);
-                            setPadding(lo);
-                            currentLine.setOnClickListener(onClickLineListener);
-                            formattedViewer.addView(currentLine);
-                            currentLine.setText("");
-                        }
+                        lineData.get(workingIndex).endWork(currentLine);
+
+                        //TODO split line if in middle
                         editor.setText("");
-                        //TODO insert new line
-                        content.add("");
-                        workingIndex = content.size()-1;
-                        currentLine = new TextView(WorkActivity.this);
-                        currentLine.setId(workingIndex);
-                        currentLine.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+
+                        for(int i = lineData.size()-1; i > workingIndex; i--){// insert id in between
+                            findViewById(i).setId(i+1);
+                        }
+                        workingIndex++;
+                        currentLine = createNewTextView(workingIndex);
                         LineObject lo = new LineObject(workingIndex, "", pad1, pad2, pad3, true);
                         lo.printLineObject(WorkActivity.this, currentLine);
                         setPadding(lo);
-                        currentLine.setOnClickListener(onClickLineListener);
-                        formattedViewer.addView(currentLine);
+                        if(workingIndex >= lineData.size()){
+                            lineData.add(lo);
+                            formattedViewer.addView(currentLine);
+                        }else{
+                            lineData.add(workingIndex, lo);
+                            formattedViewer.addView(currentLine, workingIndex);
+                        }
+
                         switchLine = false;
                     }else{
-                        //formattedViewer.removeView(currentLine);
-
-                        //currentLine = new TextView(WorkActivity.this);
-                        //currentLine.setId(workingIndex);
-                        //currentLine.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                         currentLine.setText(editor.getText().toString());
-                        content.set(workingIndex, editor.getText().toString());
-                        LineObject lo = new LineObject(workingIndex, editor.getText().toString(), pad1, pad2, pad3, true);
-                        lo.printLineObject(WorkActivity.this, currentLine);
-                        setPadding(lo);
-                        currentLine.setOnClickListener(onClickLineListener);
-                        //formattedViewer.addView(currentLine);
+                        lineData.get(workingIndex).content = editor.getText().toString();
+
+                        formatLines(workingIndex);
 
                     }
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            //Do something after 100ms
-                            if((int)currentLine.getY() > 0)
-                                scrollView.smoothScrollTo(0, (int)currentLine.getY());
-                            //scrollView.fullScroll(View.FOCUS_DOWN);
+                            if((currentLine.getY()+currentLine.getHeight()) > (scrollView.getScrollY()+scrollView.getHeight()) || currentLine.getY() < scrollView.getScrollY()){
+                                if((int)currentLine.getY() > 0)
+                                    scrollView.smoothScrollTo(0, (int)currentLine.getY()-scrollView.getHeight()/2);
+                            }
                         }
                     }, 150);
                 }
-
-
-
-
-
-
-
             }
         });
     }
@@ -211,41 +186,83 @@ public class WorkActivity extends AppCompatActivity {
 
         @Override
         public void onClick(final View v) {
-            TextView line = (TextView)v;
+            TextView lineView = (TextView)v;
 
-            if(line.getId() != currentLine.getId()){
+            if(lineView.getId() != currentLine.getId()){
                 switchLine = true;
+                lineData.get(workingIndex).endWork(currentLine);
+                currentLine = lineView;
+                workingIndex = (int)lineView.getId();
+                editor.setText(lineView.getText());
+                if(workingIndex == 0)
+                    lineData.get(workingIndex).copyPaddingFromPreviousLine(null);
+                else
+                    lineData.get(workingIndex).copyPaddingFromPreviousLine(lineData.get(workingIndex-1));
 
-                currentLine.setBackgroundColor(0x00000000);
-
-                if(content.get(content.size()-1).length() == 0 || editor.getText().toString().length() == 0){
-                    //formattedViewer.removeView(currentLine);
-
-                    //currentLine = new TextView(WorkActivity.this);
-                    //currentLine.setId(content.size()-1);
-                    //currentLine.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                    //currentLine.setText("");
-                    //LineObject lo = new LineObject(workingIndex, "", pad1, pad2, pad3, false);
-                    //lo.printLineObject(WorkActivity.this, currentLine);
-                    //setPadding(lo);
-                    //currentLine.setOnClickListener(onClickLineListener);
-                    //formattedViewer.addView(currentLine);
-                    //currentLine.setText("");
-                }
-
-
-                currentLine = line;
-                workingIndex = (int)line.getId();
-                editor.setText(line.getText());
-                content.set(workingIndex, currentLine.getText().toString());
+                lineData.get(workingIndex).content = currentLine.getText().toString();
+                setPadding(lineData.get(workingIndex));
                 currentLine.setOnClickListener(onClickLineListener);
                 currentLine.setBackgroundColor(ContextCompat.getColor(WorkActivity.this, R.color.textHighlight));
                 editor.requestFocus();
                 switchLine = false;
             }
 
+            InputMethodManager keyboard = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+            keyboard.showSoftInput(editor, 0);
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    editor.setSelection(editorOffset);
+                    if((currentLine.getY()+currentLine.getHeight()) > (scrollView.getScrollY()+scrollView.getHeight()) || currentLine.getY() < scrollView.getScrollY()){
+                        if((int)currentLine.getY() > 0)
+                            scrollView.smoothScrollTo(0, (int)currentLine.getY()-scrollView.getHeight()/2);
+                    }
+                }
+            }, 150);
+
         }
     };
+
+    public View.OnTouchListener onTouchLineListener = new View.OnTouchListener() {
+
+        @Override
+        public boolean onTouch(View view, MotionEvent motionEvent) {
+
+            if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                Layout layout = ((TextView) view).getLayout();
+
+                    int x = (int)motionEvent.getX();
+                    int y = (int)motionEvent.getY();
+                    editorOffset =  0;
+                    if (layout!=null){
+                        int line = layout.getLineForVertical(y);
+                        editorOffset = layout.getOffsetForHorizontal(line, x-view.getPaddingLeft());
+                    }
+            }
+            return false;
+        }
+    };
+
+    private void formatLines(int startIndex){
+        for(int i = startIndex; i < lineData.size(); i++){
+
+            TextView newView = findViewById(i);
+            LineObject lo = lineData.get(i);
+            lo.printLineObject(this, newView);
+            setPadding(lo);
+        }
+
+    }
+
+    private TextView createNewTextView(int index){
+        TextView temp = new TextView(this);
+        temp.setId(index);
+        temp.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        temp.setOnClickListener(onClickLineListener);
+        temp.setOnTouchListener(onTouchLineListener);
+        return temp;
+    }
 
 
     private void setPadding(LineObject lo){
@@ -253,8 +270,6 @@ public class WorkActivity extends AppCompatActivity {
         pad2 = lo.pad2;
         pad3 = lo.pad3;
     }
-
-
 
 
 
