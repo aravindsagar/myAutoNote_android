@@ -191,7 +191,7 @@ public class MyNotes extends AppCompatActivity
         if (!(item instanceof Directory)) {
             Intent intent = new Intent(this, WorkActivity.class);
             intent.putExtra("note_title", item.getName());
-            intent.putExtra("note_content", item.getName());
+            intent.putExtra("note_content", item.toString());
 
             startActivity(intent);
 
