@@ -1,41 +1,27 @@
 package paradigm.shift.myautonote;
 
-import android.graphics.Typeface;
+import android.content.Intent;
 import android.os.Handler;
-import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.Html;
 import android.text.Layout;
 import android.text.TextWatcher;
-import android.util.Log;
-import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.Scroller;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import paradigm.shift.myautonote.data_model.LineObject;
-
-import static android.support.v4.view.ViewCompat.setOverScrollMode;
-import static android.view.View.OVER_SCROLL_IF_CONTENT_SCROLLS;
 
 public class WorkActivity extends AppCompatActivity{
 
@@ -180,6 +166,19 @@ public class WorkActivity extends AppCompatActivity{
                 }
             }
         });
+        ImageButton captureButton = (ImageButton) findViewById(R.id.camera_icon);
+        captureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+                startActivity(intent);
+            }
+        }
+
+
+
+
+    );
     }
 
     public View.OnClickListener onClickLineListener = new View.OnClickListener() {
@@ -223,6 +222,7 @@ public class WorkActivity extends AppCompatActivity{
 
         }
     };
+
 
     public View.OnTouchListener onTouchLineListener = new View.OnTouchListener() {
 

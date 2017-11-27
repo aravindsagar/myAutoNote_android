@@ -32,6 +32,8 @@ import android.widget.SearchView;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import paradigm.shift.myautonote.adapter.CurPathAdapter;

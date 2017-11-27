@@ -64,9 +64,11 @@
                 android:layout_weight="2"
                 android:hint="new line"/>
 
-            <ImageView
+            <ImageButton
+                android:id="@+id/camera_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="#ffffff"
                 android:src="@drawable/ic_camera_grey"/>
 
 
