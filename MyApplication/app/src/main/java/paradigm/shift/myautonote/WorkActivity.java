@@ -1,6 +1,10 @@
 package paradigm.shift.myautonote;
 
+
 import android.content.Intent;
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -13,8 +17,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
+
 import android.widget.ImageButton;
+
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -39,6 +47,7 @@ public class WorkActivity extends AppCompatActivity{
     private EditText editor;
     private int editorOffset = 0;
     private boolean switchLine = false;
+    private Button headerButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,6 +152,11 @@ public class WorkActivity extends AppCompatActivity{
                         }else{
                             lineData.add(workingIndex, lo);
                             formattedViewer.addView(currentLine, workingIndex);
+//                            ImageView img = new ImageView(WorkActivity.this);
+//
+//                            img.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//                            img.setImageResource(R.drawable.action_camera);
+//                            formattedViewer.addView(img, workingIndex);
                         }
 
                         switchLine = false;
@@ -151,6 +165,7 @@ public class WorkActivity extends AppCompatActivity{
                         lineData.get(workingIndex).content = editor.getText().toString();
 
                         formatLines(workingIndex);
+                        changeHeaderButtonValue(lineData.get(workingIndex).headerSize);
 
                     }
                     final Handler handler = new Handler();
@@ -166,6 +181,7 @@ public class WorkActivity extends AppCompatActivity{
                 }
             }
         });
+
         ImageButton captureButton = (ImageButton) findViewById(R.id.camera_icon);
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -179,6 +195,52 @@ public class WorkActivity extends AppCompatActivity{
 
 
     );
+
+
+        headerButton = (Button) findViewById(R.id.header_button);
+        final LinearLayout headerSelectView = (LinearLayout) findViewById(R.id.header_select_view);
+
+        headerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(headerSelectView.getVisibility() == View.VISIBLE){
+
+                    ObjectAnimator a = ObjectAnimator.ofFloat(headerSelectView, "alpha", 1, 0);
+                    a.setCurrentPlayTime(150);
+
+                    a.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animator) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animator) {
+                            headerSelectView.setVisibility(View.GONE);
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animator) {
+
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animator) {
+
+                        }
+                    });
+                    a.start();
+
+                }else{
+                    headerSelectView.setVisibility(View.VISIBLE);
+                    ObjectAnimator a = ObjectAnimator.ofFloat(headerSelectView, "alpha", 0, 1);
+                    a.setCurrentPlayTime(150);
+                    a.start();
+                }
+
+            }
+        });
+
     }
 
     public View.OnClickListener onClickLineListener = new View.OnClickListener() {
@@ -247,7 +309,7 @@ public class WorkActivity extends AppCompatActivity{
     private void formatLines(int startIndex){
         for(int i = startIndex; i < lineData.size(); i++){
 
-            TextView newView = findViewById(i);
+            TextView newView = (TextView) findViewById(i);
             LineObject lo = lineData.get(i);
             lo.printLineObject(this, newView);
             setPadding(lo);
@@ -269,6 +331,35 @@ public class WorkActivity extends AppCompatActivity{
         pad1 = lo.pad1;
         pad2 = lo.pad2;
         pad3 = lo.pad3;
+    }
+
+    private void changeHeaderButtonValue(int val){
+        //Log.d("VAL", val + "");
+        switch (val){
+            case 0:
+                headerButton.setBackgroundResource(R.drawable.ic_text_select_black);
+                headerButton.setScaleX((float)1);
+                headerButton.setScaleY((float)1);
+                headerButton.setAlpha((float)1);
+                break;
+            case 1:
+                headerButton.setScaleX((float)0.7);
+                headerButton.setScaleY((float)0.7);
+                headerButton.setAlpha((float)0.7);
+                break;
+            case 2:
+                headerButton.setBackgroundResource(R.drawable.ic_text_select);
+                headerButton.setScaleX((float)0.9);
+                headerButton.setScaleY((float)0.9);
+                headerButton.setAlpha((float)0.9);
+                break;
+            case 3:
+                headerButton.setBackgroundResource(R.drawable.ic_text_select);
+                headerButton.setScaleX((float)1);
+                headerButton.setScaleY((float)1);
+                headerButton.setAlpha((float)1);
+                break;
+        }
     }
 
 

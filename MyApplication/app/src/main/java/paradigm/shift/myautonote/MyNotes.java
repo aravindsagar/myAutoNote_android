@@ -90,8 +90,8 @@ public class MyNotes extends AppCompatActivity
         myDirList.setOnItemClickListener(this);
         myDirList.setOnItemLongClickListener(this);
 
-        mySuggestionsLayout = findViewById(R.id.suggestion_layout);
-        myCurPathView = findViewById(R.id.cur_path_view);
+        mySuggestionsLayout = (LinearLayout) findViewById(R.id.suggestion_layout);
+        myCurPathView = (RecyclerView) findViewById(R.id.cur_path_view);
         myCurPathAdapter = new CurPathAdapter(myDirListAdapter.getCurPath(), this);
         myCurPathView.setAdapter(myCurPathAdapter);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -100,7 +100,7 @@ public class MyNotes extends AppCompatActivity
         myCurPathView.setLayoutManager(mLayoutManager);
         myCurPathView.addItemDecoration(dividerItemDecoration);
 
-        Button newFolderBtn = findViewById(R.id.btn_new_folder);
+        Button newFolderBtn = (Button)findViewById(R.id.btn_new_folder);
         newFolderBtn.setOnClickListener(this);
     }
 

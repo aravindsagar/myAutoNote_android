@@ -4,6 +4,7 @@
 
     <application android:allowBackup="true" android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name" android:roundIcon="@mipmap/ic_launcher_round"
+
         android:supportsRtl="true" android:theme="@style/AppTheme">
         <activity android:name=".MyNotes" android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
@@ -13,8 +14,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".WorkActivity"></activity>
 
+        <activity android:name=".WorkActivity"
+            android:parentActivityName=".MyNotes"></activity>
     </application>
 
 </manifest>

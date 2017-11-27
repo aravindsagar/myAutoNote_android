@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,6 +9,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_gravity="top"
         android:orientation="vertical">
 
 
@@ -52,10 +53,13 @@
             android:gravity="center"
             android:padding="6dp">
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/action_header_adjust"/>
+            <Button
+                android:id="@+id/header_button"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:background="@drawable/ic_text_select"
+                android:foreground="?android:attr/selectableItemBackground"/>
+
 
             <EditText
                 android:id="@+id/edit_box"
@@ -80,6 +84,54 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/header_select_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/header_layout_background"
+        android:elevation="6dp"
+        android:gravity="bottom"
+        android:orientation="horizontal"
+        android:paddingBottom="2dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="2dp"
+        android:translationZ="6dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="60dp"
+        android:layout_marginLeft="6dp"
+        android:visibility="gone"
+        >
+
+        <ImageView
+            android:id="@+id/headerSize_1"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:alpha="1"
+            android:src="@drawable/ic_text_select" />
+
+        <ImageView
+            android:id="@+id/headerSize_2"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:alpha="0.9"
+            android:src="@drawable/ic_text_select" />
+
+        <ImageView
+            android:id="@+id/headerSize_3"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:alpha="0.8"
+            android:src="@drawable/ic_text_select" />
+
+        <ImageView
+            android:id="@+id/headerSize_4"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:src="@drawable/ic_text_select_black" />
 
 
-</android.support.constraint.ConstraintLayout>
+    </LinearLayout>
+
+
+</FrameLayout>
