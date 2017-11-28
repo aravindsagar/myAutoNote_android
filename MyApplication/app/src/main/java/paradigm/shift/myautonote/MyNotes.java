@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -51,6 +52,7 @@ public class MyNotes extends AppCompatActivity
         AdapterView.OnItemLongClickListener, CurPathItemClickListener, View.OnClickListener,
         DataChangedListener, EditFinishedListener {
 
+    private static final String NEW_NOTE_CONTENTS = "$0#";
     private enum State {
         NORMAL, CREATING, RENAMING
     }
@@ -64,10 +66,14 @@ public class MyNotes extends AppCompatActivity
     private int myEditPosition = -1;
     private String myLastLongpressName;
     private Dialog myBottomDialog;
+    private Handler myHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        myHandler = new Handler();
+
         setContentView(R.layout.activity_my_notes);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -100,8 +106,10 @@ public class MyNotes extends AppCompatActivity
         myCurPathView.setLayoutManager(mLayoutManager);
         myCurPathView.addItemDecoration(dividerItemDecoration);
 
-        Button newFolderBtn = (Button)findViewById(R.id.btn_new_folder);
+        Button newFolderBtn = (Button)findViewById(R.id.btn_new_folder),
+                newNoteBtn = (Button) findViewById(R.id.btn_new_note);
         newFolderBtn.setOnClickListener(this);
+        newNoteBtn.setOnClickListener(this);
     }
 
     /**
@@ -189,40 +197,33 @@ public class MyNotes extends AppCompatActivity
     @SuppressLint("StaticFieldLeak")
     @Override
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-        final DataItem item = (DataItem) myDirListAdapter.getItem(position);
-        if (!(item instanceof Directory)) {
-            Intent intent = new Intent(this, WorkActivity.class);
-            intent.putExtra("note_title", item.getName());
-            intent.putExtra("note_content", item.toString());
-
-            startActivity(intent);
-
-        }
         if (myState != State.NORMAL) {
             Log.d("MyNotes", "Not acting on press");
             return;
         }
 
-        Log.d("MyNotes", "Acting on press");
-        new AsyncTask<Void, Void, Void>() {
+        final DataItem item = (DataItem) myDirListAdapter.getItem(position);
 
-            @Override
-            protected Void doInBackground(Void... voids) {
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
+        if (!(item instanceof Directory)) {
+            startWorkActivity(item.getName(), item.toString());
+            return;
+        }
 
+        myHandler.postDelayed(new Runnable() {
             @Override
-            protected void onPostExecute(Void aVoid) {
-                super.onPostExecute(aVoid);
+            public void run() {
                 myDirListAdapter.itemClick(position);
                 setCurDirPathView();
             }
-        }.execute();
+        }, 100);
+    }
+
+    private void startWorkActivity(final String name, final String s) {
+        Intent intent = new Intent(this, WorkActivity.class);
+        intent.putExtra("note_title", name);
+        intent.putExtra("note_content", s);
+
+        startActivity(intent);
     }
 
     /**
@@ -253,7 +254,7 @@ public class MyNotes extends AppCompatActivity
         myBottomDialog.getWindow().setGravity(Gravity.BOTTOM);
         myBottomDialog.findViewById(R.id.btn_rename).setOnClickListener(this);
         myBottomDialog.findViewById(R.id.btn_move).setOnClickListener(this);
-        myBottomDialog.findViewById(R.id.btn_delete).setOnClickListener(this);
+        myBottomDialog.findViewById(R.id.btn_delete).setOnClickListener (this);
         myBottomDialog.show();
         return true;
     }
@@ -288,6 +289,17 @@ public class MyNotes extends AppCompatActivity
                 setSoftKeyboard(true);
                 break;
 
+            case R.id.btn_new_note:
+                String newNoteName = getUnusedNewNoteName(myDirListAdapter.getCurDir());
+                try {
+                    DataWriter.getInstance(this).addFile(myDirListAdapter.getCurPath(), newNoteName, NEW_NOTE_CONTENTS);
+                    startWorkActivity(newNoteName, NEW_NOTE_CONTENTS);
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                    Snackbar.make(findViewById(R.id.parent_layout), "Error creating note", Snackbar.LENGTH_SHORT);
+                }
+                break;
+
             case R.id.btn_rename :
                 myBottomDialog.dismiss();
                 myState = State.RENAMING;
@@ -296,6 +308,7 @@ public class MyNotes extends AppCompatActivity
                 myDirList.setSelection(myEditPosition);
                 setSoftKeyboard(true);
                 break;
+
             case R.id.btn_delete :
                 myBottomDialog.dismiss();
                 try {
@@ -306,6 +319,7 @@ public class MyNotes extends AppCompatActivity
                     Snackbar.make(findViewById(R.id.parent_layout), "Error deleting item", Snackbar.LENGTH_SHORT);
                 }
                 break;
+
             case R.id.btn_move :
                 break;
         }
@@ -317,6 +331,17 @@ public class MyNotes extends AppCompatActivity
         String unused = st;
         int i = 0;
         while (d.getSubDirectory(unused) != null) {
+            i++;
+            unused = st + " " + i;
+        }
+        return unused;
+    }
+
+    private String getUnusedNewNoteName(Directory d) {
+        String st = "New Note";
+        String unused = st;
+        int i = 0;
+        while (d.getFile(unused) != null) {
             i++;
             unused = st + " " + i;
         }

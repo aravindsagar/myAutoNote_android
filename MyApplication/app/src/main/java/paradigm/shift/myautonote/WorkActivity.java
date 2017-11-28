@@ -1,28 +1,28 @@
 package paradigm.shift.myautonote;
 
 
-import android.content.Intent;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
-import android.graphics.Typeface;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Layout;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-
 import android.widget.ImageButton;
-
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -48,19 +48,49 @@ public class WorkActivity extends AppCompatActivity{
     private int editorOffset = 0;
     private boolean switchLine = false;
     private Button headerButton;
+    private TextView titleView;
+    private EditText titleEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
 
-        //TODO- does not work
+        Toolbar toolbar = (Toolbar) findViewById(R.id.work_toolbar);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        titleView = toolbar.findViewById(R.id.text_note_name);
+        titleEditor = toolbar.findViewById(R.id.edit_note_name);
+        titleView.setText(getIntent().getStringExtra("note_title"));
+        titleView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                titleEditor.setText(titleView.getText());
+                titleEditor.setSelectAllOnFocus(true);
+                titleView.setVisibility(View.GONE);
+                titleEditor.setVisibility(View.VISIBLE);
+                titleEditor.requestFocus();
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(titleEditor, 0);
+            }
+        });
+        titleEditor.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+//                    DataWriter.getInstance(WorkActivity.this).editFile();
+                    titleView.setText(titleEditor.getText());
+                    titleEditor.setVisibility(View.GONE);
+                    titleView.setVisibility(View.VISIBLE);
+                    return true;
+                }
+                return false;
+            }
+        });
 
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        setTitle(getIntent().getStringExtra("note_title"));
 
         formattedViewer = (LinearLayout) findViewById(R.id.formatted_viewer);
         scrollView = (ScrollView) findViewById(R.id.scrollable_viewer);
