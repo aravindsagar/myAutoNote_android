@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -45,6 +46,10 @@ import paradigm.shift.myautonote.data_model.File;
 import paradigm.shift.myautonote.data_util.DataChangedListener;
 import paradigm.shift.myautonote.data_util.DataReader;
 import paradigm.shift.myautonote.data_util.DataWriter;
+
+import static paradigm.shift.myautonote.WorkActivity.CUR_DIR;
+import static paradigm.shift.myautonote.WorkActivity.NOTE_CONTENT;
+import static paradigm.shift.myautonote.WorkActivity.NOTE_TITLE;
 
 public class MyNotes extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemClickListener,
@@ -153,21 +158,6 @@ public class MyNotes extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_search, menu);
-
-        MenuItem item = menu.findItem(R.id.menuSearch);
-        SearchView searchView = (SearchView)item.getActionView();
-
-        searchView.setOnQueryTextListener( new SearchView.OnQueryTextListener(){
-            @Override
-            public boolean onQueryTextSubmit(String query){
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText){
-                return false;
-            }
-        });
         return true;
     }
 
@@ -179,7 +169,8 @@ public class MyNotes extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_search) {
+            onSearchRequested();
             return true;
         }
 
@@ -240,9 +231,9 @@ public class MyNotes extends AppCompatActivity
 
     private void startWorkActivity(final String name, final String s) {
         Intent intent = new Intent(this, WorkActivity.class);
-        intent.putExtra("note_title", name);
-        intent.putExtra("note_content", s);
-        intent.putExtra("cur_dir", myDirListAdapter.getCurPathStr());
+        intent.putExtra(NOTE_TITLE, name);
+        intent.putExtra(NOTE_CONTENT, s);
+        intent.putExtra(CUR_DIR, myDirListAdapter.getCurPathStr());
 
         startActivity(intent);
     }

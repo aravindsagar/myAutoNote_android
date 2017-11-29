@@ -17,7 +17,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -28,9 +27,7 @@ import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
 
-
 import android.view.KeyEvent;
-
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +37,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -55,7 +51,6 @@ import java.util.Date;
 
 import org.json.JSONException;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +62,10 @@ import paradigm.shift.myautonote.data_util.DataReader;
 import paradigm.shift.myautonote.data_util.DataWriter;
 
 public class WorkActivity extends AppCompatActivity{
+
+    public static final String CUR_DIR = "cur_dir";
+    public static final String NOTE_CONTENT = "note_content";
+    public static final String NOTE_TITLE = "note_title";
 
     private String[] content;
     private ArrayList<LineObject> lineData;
@@ -100,7 +99,7 @@ public class WorkActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
 
-        String[] curPath = getIntent().getStringArrayExtra("cur_dir");
+        String[] curPath = getIntent().getStringArrayExtra(CUR_DIR);
         Directory dir = DataReader.getInstance(this).getTopDir();
         myNoteDir = new ArrayList<>();
         myNoteDir.add(dir);
@@ -116,7 +115,7 @@ public class WorkActivity extends AppCompatActivity{
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         titleView = toolbar.findViewById(R.id.text_note_name);
         titleEditor = toolbar.findViewById(R.id.edit_note_name);
-        myNoteName = getIntent().getStringExtra("note_title");
+        myNoteName = getIntent().getStringExtra(NOTE_TITLE);
         titleView.setText(myNoteName);
         titleView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -136,7 +135,7 @@ public class WorkActivity extends AppCompatActivity{
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     try {
                         DataWriter.getInstance(WorkActivity.this).editFile(myNoteDir, myNoteName, titleEditor.getText().toString(),
-                                getIntent().getStringExtra("note_content")); // TODO replace with current contents.
+                                getIntent().getStringExtra(NOTE_CONTENT)); // TODO replace with current contents.
                         myNoteName = titleEditor.getText().toString();
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();

@@ -10,4 +10,6 @@
     <string name="rename">Rename</string>
     <string name="move">Move</string>
     <string name="delete">Delete</string>
+    <string name="search_hint">Search my notes</string>
+    <string name="no_results">Nothing found</string>
 </resources>

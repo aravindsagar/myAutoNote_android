@@ -66,4 +66,12 @@ public class Directory extends DataItem {
         }
         return sb.toString();
     }
+
+    @Override
+    public SearchResult search(final List<DataItem> path, final String query) {
+        if (getName().toLowerCase().contains(query)) {
+            return new SearchResult(path, null, true);
+        }
+        return null;
+    }
 }

@@ -25,4 +25,6 @@ public abstract class DataItem {
     public Directory getParent() {
         return myParent;
     }
+
+    public abstract SearchResult search(final List<DataItem> path, final String query);
 }
