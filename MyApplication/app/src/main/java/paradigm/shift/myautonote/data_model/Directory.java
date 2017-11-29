@@ -1,6 +1,5 @@
 package paradigm.shift.myautonote.data_model;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

@@ -1,6 +1,5 @@
 package paradigm.shift.myautonote.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
@@ -8,7 +7,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
@@ -206,9 +204,7 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
         if (item instanceof Directory) {
             setCurDir((Directory) item);
             myCurPath.add((Directory) item);
-        } else {
-            //TODO: intent to open note edit activity.
-        }
+        } // Opening Note is taken care of by MyNotes activity.
     }
 
     /**

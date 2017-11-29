@@ -4,10 +4,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.text.Html;
-import android.util.Log;
 import android.widget.TextView;
-
-import java.util.ArrayList;
 
 import paradigm.shift.myautonote.R;
 

@@ -1,7 +1,6 @@
 package paradigm.shift.myautonote.util;
 
 import android.content.Context;
-import android.util.Pair;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

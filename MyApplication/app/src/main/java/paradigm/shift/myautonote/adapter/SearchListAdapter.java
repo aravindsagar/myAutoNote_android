@@ -15,7 +15,6 @@ import java.util.List;
 import paradigm.shift.myautonote.R;
 import paradigm.shift.myautonote.WorkActivity;
 import paradigm.shift.myautonote.data_model.DataItem;
-import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.File;
 import paradigm.shift.myautonote.data_model.SearchResult;
 

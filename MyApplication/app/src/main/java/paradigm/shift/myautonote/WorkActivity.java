@@ -2,23 +2,17 @@ package paradigm.shift.myautonote;
 
 
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.content.Intent;
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
-import android.graphics.Bitmap;
-import android.graphics.Typeface;
-import android.net.Uri;
-import android.os.Environment;
-
-import android.animation.Animator;
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
+import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
@@ -27,7 +21,6 @@ import android.text.Editable;
 import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
-
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -43,20 +36,14 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import org.json.JSONException;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
-
-import org.json.JSONException;
-
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-
 
 import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.LineObject;
@@ -138,13 +125,8 @@ public class WorkActivity extends AppCompatActivity{
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    try {
-                        DataWriter.getInstance(WorkActivity.this).editFile(myNoteDir, myNoteName, titleEditor.getText().toString(),
-                                getIntent().getStringExtra(NOTE_CONTENT)); // TODO replace with current contents.
-                        myNoteName = titleEditor.getText().toString();
-                    } catch (IOException | JSONException e) {
-                        e.printStackTrace();
-                    }
+                    save(titleEditor.getText().toString());
+                    myNoteName = titleEditor.getText().toString();
                     titleView.setText(myNoteName);
                     titleEditor.setVisibility(View.GONE);
                     titleView.setVisibility(View.VISIBLE);
@@ -526,18 +508,23 @@ public class WorkActivity extends AppCompatActivity{
         }
     }
 
-    private void save(){
+    private void save() {
+        save(null);
+    }
+
+    private void save(final String destination){
         String result = "";
         for(int i = 0; i < lineData.size(); i++){
             result += lineData.get(i).toString();
         }
         //dir, final String newFileName, final String contents
         try {
-            dataWriter.editFile(myNoteDir, myNoteName, null, result);
+            dataWriter.editFile(myNoteDir, myNoteName, destination, result);
             dirty = false;
             //Log.d("saved", "save: ");
         }catch (Exception e){
-
+            e.printStackTrace();
+            Snackbar.make(formattedViewer, "Error saving note", Snackbar.LENGTH_SHORT).show();
         }
 
         //Log.d("RESULT", result);
