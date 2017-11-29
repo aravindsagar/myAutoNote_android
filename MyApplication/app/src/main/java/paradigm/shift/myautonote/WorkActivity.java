@@ -417,7 +417,10 @@ public class WorkActivity extends AppCompatActivity{
                 currentLine.setBackgroundColor(ContextCompat.getColor(WorkActivity.this, R.color.textHighlight));
                 editor.requestFocus();
                 switchLine = false;
+
             }
+
+
 
             InputMethodManager keyboard = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
             keyboard.showSoftInput(editor, 0);
@@ -467,6 +470,10 @@ public class WorkActivity extends AppCompatActivity{
     }
 
     private void formatLines(int startIndex){
+        if(startIndex > 0)
+            setPadding(lineData.get(startIndex-1));
+        else
+            setPadding(null);
         for(int i = startIndex; i < lineData.size(); i++){
 
             TextView newView = (TextView) findViewById(i);
@@ -488,9 +495,16 @@ public class WorkActivity extends AppCompatActivity{
 
 
     private void setPadding(LineObject lo){
-        pad1 = lo.pad1;
-        pad2 = lo.pad2;
-        pad3 = lo.pad3;
+        if(lo == null){
+            pad1 = 0;
+            pad2 = 0;
+            pad3 = 0;
+        }else{
+            pad1 = lo.pad1;
+            pad2 = lo.pad2;
+            pad3 = lo.pad3;
+        }
+
     }
 
     private void changeHeaderButtonValue(int val){
@@ -498,20 +512,21 @@ public class WorkActivity extends AppCompatActivity{
         switch (val){
             case 0:
                 headerButton.setBackgroundResource(R.drawable.ic_text_select_black);
-                headerButton.setScaleX((float)1);
-                headerButton.setScaleY((float)1);
+//                headerButton.setScaleX((float)1);
+//                headerButton.setScaleY((float)1);
                 headerButton.setAlpha((float)1);
                 break;
             case 1:
-                headerButton.setScaleX((float)0.7);
-                headerButton.setScaleY((float)0.7);
-                headerButton.setAlpha((float)0.7);
+                headerButton.setBackgroundResource(R.drawable.ic_text_select);
+//                headerButton.setScaleX((float)0.7);
+//                headerButton.setScaleY((float)0.7);
+                headerButton.setAlpha((float)0.6);
                 break;
             case 2:
                 headerButton.setBackgroundResource(R.drawable.ic_text_select);
 //                headerButton.setScaleX((float)0.9);
 //                headerButton.setScaleY((float)0.9);
-                headerButton.setAlpha((float)0.9);
+                headerButton.setAlpha((float)0.8);
                 break;
             case 3:
                 headerButton.setBackgroundResource(R.drawable.ic_text_select);
