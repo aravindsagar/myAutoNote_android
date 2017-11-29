@@ -2,8 +2,9 @@ package paradigm.shift.myautonote;
 
 import android.app.SearchManager;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -13,6 +14,7 @@ import java.util.List;
 
 import paradigm.shift.myautonote.adapter.SearchListAdapter;
 import paradigm.shift.myautonote.data_model.SearchResult;
+import paradigm.shift.myautonote.util.MySuggestionsProvider;
 import paradigm.shift.myautonote.util.Searcher;
 
 public class SearchActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -39,6 +41,12 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY).toLowerCase();
             getSupportActionBar().setTitle("Results for \"" + query + "\"");
+
+            // Save this query to enable search suggestions.
+            SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
+                    MySuggestionsProvider.AUTHORITY, MySuggestionsProvider.MODE);
+            suggestions.saveRecentQuery(query, null);
+
             List<SearchResult> results = Searcher.getSearchResults(query, this);
             displayResults(query, results);
         }

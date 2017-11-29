@@ -21,6 +21,8 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+        <provider android:name=".util.MySuggestionsProvider"
+            android:authorities="paradigm.shift.myautonote.util.MySuggestionsProvider" />
 
         <activity
             android:name=".MyNotes"
