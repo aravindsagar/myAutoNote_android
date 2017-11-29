@@ -70,6 +70,11 @@
             android:scrollbars="horizontal"
             android:visibility="gone" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:alpha="0.5"/>
         <!-- List view for showing the directory structure.  -->
         <ListView
             android:id="@+id/list_view_dir_list"
