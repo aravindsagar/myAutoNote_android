@@ -27,9 +27,16 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import org.json.JSONException;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.LineObject;
+import paradigm.shift.myautonote.data_util.DataReader;
+import paradigm.shift.myautonote.data_util.DataWriter;
 
 public class WorkActivity extends AppCompatActivity{
 
@@ -50,22 +57,34 @@ public class WorkActivity extends AppCompatActivity{
     private Button headerButton;
     private TextView titleView;
     private EditText titleEditor;
+    private List<Directory> myNoteDir;
+    private String myNoteName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
 
+        String[] curPath = getIntent().getStringArrayExtra("cur_dir");
+        Directory dir = DataReader.getInstance(this).getTopDir();
+        myNoteDir = new ArrayList<>();
+        myNoteDir.add(dir);
+        for (int i = 1; i < curPath.length; i++) {
+            dir = dir.getSubDirectory(curPath[i]);
+            myNoteDir.add(dir);
+        }
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.work_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         titleView = toolbar.findViewById(R.id.text_note_name);
         titleEditor = toolbar.findViewById(R.id.edit_note_name);
-        titleView.setText(getIntent().getStringExtra("note_title"));
+        myNoteName = getIntent().getStringExtra("note_title");
+        titleView.setText(myNoteName);
         titleView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                titleEditor.setText(titleView.getText());
+                titleEditor.setText(myNoteName);
                 titleEditor.setSelectAllOnFocus(true);
                 titleView.setVisibility(View.GONE);
                 titleEditor.setVisibility(View.VISIBLE);
@@ -78,8 +97,14 @@ public class WorkActivity extends AppCompatActivity{
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                    DataWriter.getInstance(WorkActivity.this).editFile();
-                    titleView.setText(titleEditor.getText());
+                    try {
+                        DataWriter.getInstance(WorkActivity.this).editFile(myNoteDir, myNoteName, titleEditor.getText().toString(),
+                                getIntent().getStringExtra("note_content")); // TODO replace with current contents.
+                        myNoteName = titleEditor.getText().toString();
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
+                    titleView.setText(myNoteName);
                     titleEditor.setVisibility(View.GONE);
                     titleView.setVisibility(View.VISIBLE);
                     return true;

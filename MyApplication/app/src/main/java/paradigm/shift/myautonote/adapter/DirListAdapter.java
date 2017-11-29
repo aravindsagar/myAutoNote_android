@@ -215,6 +215,16 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
         return myCurPath;
     }
 
+    public String[] getCurPathStr() {
+        String[] curPath = new String[myCurPath.size()];
+        int i = 0;
+        for (Directory d : myCurPath) {
+            curPath[i] = d.getName();
+            i++;
+        }
+        return curPath;
+    }
+
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {

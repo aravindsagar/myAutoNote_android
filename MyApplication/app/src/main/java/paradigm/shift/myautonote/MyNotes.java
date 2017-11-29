@@ -222,6 +222,7 @@ public class MyNotes extends AppCompatActivity
         Intent intent = new Intent(this, WorkActivity.class);
         intent.putExtra("note_title", name);
         intent.putExtra("note_content", s);
+        intent.putExtra("cur_dir", myDirListAdapter.getCurPathStr());
 
         startActivity(intent);
     }

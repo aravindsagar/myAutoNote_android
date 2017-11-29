@@ -22,8 +22,8 @@
                     android:id="@+id/text_note_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Android"
                     android:textSize="20sp"
+                    android:textColor="@android:color/white"
                     android:textStyle="bold"/>
                 <EditText
                     android:layout_width="match_parent"
