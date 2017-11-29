@@ -123,7 +123,7 @@ public class DataWriter {
      */
     public void editFile(final List<Directory> dir, final String source, final String destination, final String contents)
             throws IOException, JSONException {
-        Log.d("DataWriter", "Renaming folder " + source);
+        Log.d("DataWriter", "Editing file " + source);
         File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
         JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
         JSONObject jDir = jsonObject.getJSONObject("files");

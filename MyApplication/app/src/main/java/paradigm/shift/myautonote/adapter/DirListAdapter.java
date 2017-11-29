@@ -2,6 +2,7 @@ package paradigm.shift.myautonote.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -51,6 +52,7 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
     private final Context myContext;
     private int myEditablePosition = -1;
     private EditFinishedListener myEditFinishedListener;
+    private Handler myHandler;
 
     public DirListAdapter(final Context context) {
         myTopDir = DataReader.getInstance(context).getTopDir();
@@ -59,6 +61,7 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
         myCurPath.add(myTopDir);
         myInflater = LayoutInflater.from(context);
         myContext = context;
+        myHandler = new Handler();
     }
 
     private void setCurDir(final Directory curDir) {
@@ -156,8 +159,17 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
             holder.editText.setText(item);
             holder.editText.setOnEditorActionListener(this);
             holder.editText.setOnFocusChangeListener(this);
-            holder.editText.setSelectAllOnFocus(true);
-            holder.editText.requestFocus();
+            final ViewHolder finalHolder = holder;
+            myHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    finalHolder.editText.setSelectAllOnFocus(true);
+                    finalHolder.editText.requestFocus();
+                    InputMethodManager imm = (InputMethodManager)myContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.showSoftInput(finalHolder.editText, 0);
+                    finalHolder.editText.setSelection(0, finalHolder.editText.getText().length());
+                }
+            }, 300);
         } else {
             holder.textView.setVisibility(View.VISIBLE);
             holder.editText.setVisibility(View.GONE);

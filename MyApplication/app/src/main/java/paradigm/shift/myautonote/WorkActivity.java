@@ -25,12 +25,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import org.json.JSONException;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -215,6 +217,7 @@ public class WorkActivity extends AppCompatActivity{
                             lineData.add(workingIndex, lo);
                             formattedViewer.addView(currentLine, workingIndex);
 //                            ImageView img = new ImageView(WorkActivity.this);
+//                            img.setImageURI(new File(getFilesDir(), imgFileName).toURI());
 //
 //                            img.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 //                            img.setImageResource(R.drawable.action_camera);

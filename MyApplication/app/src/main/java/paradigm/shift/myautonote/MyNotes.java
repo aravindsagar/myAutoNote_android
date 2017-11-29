@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.NavigationView;
@@ -33,8 +32,6 @@ import android.widget.SearchView;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import paradigm.shift.myautonote.adapter.CurPathAdapter;
@@ -287,7 +284,7 @@ public class MyNotes extends AppCompatActivity
                 myDirListAdapter.setEditable(myEditPosition, this);
                 myDirListAdapter.notifyDataSetChanged();
                 myDirList.setSelection(myEditPosition);
-                setSoftKeyboard(true);
+//                setSoftKeyboard(true);
                 break;
 
             case R.id.btn_new_note:
@@ -307,7 +304,7 @@ public class MyNotes extends AppCompatActivity
                 myDirListAdapter.setEditable(myEditPosition, this);
                 myDirListAdapter.notifyDataSetChanged();
                 myDirList.setSelection(myEditPosition);
-                setSoftKeyboard(true);
+//                setSoftKeyboard(true);
                 break;
 
             case R.id.btn_delete :
