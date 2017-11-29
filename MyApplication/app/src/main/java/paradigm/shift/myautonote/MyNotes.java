@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -64,6 +65,7 @@ public class MyNotes extends AppCompatActivity
     private String myLastLongpressName;
     private Dialog myBottomDialog;
     private Handler myHandler;
+    private CoordinatorLayout myBottomBarCoordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +109,8 @@ public class MyNotes extends AppCompatActivity
                 newNoteBtn = (Button) findViewById(R.id.btn_new_note);
         newFolderBtn.setOnClickListener(this);
         newNoteBtn.setOnClickListener(this);
+
+        myBottomBarCoordinatorLayout = findViewById(R.id.coordinator_bottom_bar);
 
         setupSuggestions();
     }
@@ -312,7 +316,7 @@ public class MyNotes extends AppCompatActivity
                     startWorkActivity(newNoteName, NEW_NOTE_CONTENTS);
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
-                    Snackbar.make(findViewById(R.id.parent_layout), "Error creating note", Snackbar.LENGTH_SHORT);
+                    Snackbar.make(myBottomBarCoordinatorLayout, "Error creating note", Snackbar.LENGTH_SHORT).show();
                 }
                 break;
 
@@ -329,10 +333,10 @@ public class MyNotes extends AppCompatActivity
                 myBottomDialog.dismiss();
                 try {
                     DataWriter.getInstance(this).editFolder(myDirListAdapter.getCurPath(), myLastLongpressName, null);
-                    Snackbar.make(findViewById(R.id.parent_layout), "'" + myLastLongpressName + "' deleted", Snackbar.LENGTH_SHORT);
+                    Snackbar.make(myBottomBarCoordinatorLayout, "'" + myLastLongpressName + "' deleted", Snackbar.LENGTH_SHORT).show();
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
-                    Snackbar.make(findViewById(R.id.parent_layout), "Error deleting item", Snackbar.LENGTH_SHORT);
+                    Snackbar.make(myBottomBarCoordinatorLayout, "Error deleting item", Snackbar.LENGTH_SHORT).show();
                 }
                 break;
 
@@ -377,14 +381,14 @@ public class MyNotes extends AppCompatActivity
                 DataWriter.getInstance(this).addFolder(myDirListAdapter.getCurPath(), newText);
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
-                Snackbar.make(findViewById(R.id.parent_layout), "Error creating folder", Snackbar.LENGTH_SHORT);
+                Snackbar.make(myBottomBarCoordinatorLayout, "Error creating folder", Snackbar.LENGTH_SHORT).show();
             }
         } else if (myState == State.RENAMING) {
             try {
                 DataWriter.getInstance(this).editFolder(myDirListAdapter.getCurPath(), myLastLongpressName, newText);
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
-                Snackbar.make(findViewById(R.id.parent_layout), "Error renaming folder", Snackbar.LENGTH_SHORT);
+                Snackbar.make(myBottomBarCoordinatorLayout, "Error renaming folder", Snackbar.LENGTH_SHORT).show();
             }
         }
 

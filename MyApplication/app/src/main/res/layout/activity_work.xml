@@ -32,7 +32,8 @@
                     android:id="@+id/edit_note_name"
                     android:singleLine="true"
                     android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:layout_marginEnd="20dp"/>
             </android.support.v7.widget.Toolbar>
 
         </android.support.design.widget.AppBarLayout>
