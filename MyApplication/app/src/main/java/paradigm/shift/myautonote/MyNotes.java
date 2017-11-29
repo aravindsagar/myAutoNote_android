@@ -107,6 +107,24 @@ public class MyNotes extends AppCompatActivity
                 newNoteBtn = (Button) findViewById(R.id.btn_new_note);
         newFolderBtn.setOnClickListener(this);
         newNoteBtn.setOnClickListener(this);
+
+        setupSuggestions();
+    }
+
+    private void setupSuggestions() {
+        Button suggeston1 = findViewById(R.id.btn_suggestion_1),
+                suggeston2 = findViewById(R.id.btn_suggestion_2),
+                suggeston3 = findViewById(R.id.btn_suggestion_3);
+
+        Directory topDir = DataReader.getInstance(this).getTopDir();
+        if (topDir.getSubdirectoryNames().size() < 3) {
+            mySuggestionsLayout.setVisibility(View.GONE);
+        } else {
+            mySuggestionsLayout.setVisibility(View.VISIBLE);
+            suggeston1.setText(topDir.getSubdirectoryNames().get(0));
+            suggeston2.setText(topDir.getSubdirectoryNames().get(1));
+            suggeston3.setText(topDir.getSubdirectoryNames().get(1));
+        }
     }
 
     /**
@@ -263,7 +281,7 @@ public class MyNotes extends AppCompatActivity
     private void setCurDirPathView() {
         if (myDirListAdapter.isInTopDir()) {
             myCurPathView.setVisibility(View.GONE);
-            mySuggestionsLayout.setVisibility(View.VISIBLE);
+            setupSuggestions();
         } else {
             myCurPathView.setVisibility(View.VISIBLE);
             mySuggestionsLayout.setVisibility(View.GONE);
