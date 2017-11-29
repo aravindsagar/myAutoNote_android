@@ -101,7 +101,7 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
         return myDirs;
     }
 
-    public List<String> getMyFiles() {
+    public List<String> getFiles() {
         return myFiles;
     }
 

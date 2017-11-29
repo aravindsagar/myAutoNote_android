@@ -41,6 +41,7 @@ import paradigm.shift.myautonote.adapter.DirListAdapter;
 import paradigm.shift.myautonote.adapter.EditFinishedListener;
 import paradigm.shift.myautonote.data_model.DataItem;
 import paradigm.shift.myautonote.data_model.Directory;
+import paradigm.shift.myautonote.data_model.File;
 import paradigm.shift.myautonote.data_util.DataChangedListener;
 import paradigm.shift.myautonote.data_util.DataReader;
 import paradigm.shift.myautonote.data_util.DataWriter;
@@ -331,13 +332,44 @@ public class MyNotes extends AppCompatActivity
 
             case R.id.btn_delete :
                 myBottomDialog.dismiss();
-                try {
-                    DataWriter.getInstance(this).editFolder(myDirListAdapter.getCurPath(), myLastLongpressName, null);
-                    Snackbar.make(myBottomBarCoordinatorLayout, "'" + myLastLongpressName + "' deleted", Snackbar.LENGTH_SHORT).show();
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
-                    Snackbar.make(myBottomBarCoordinatorLayout, "Error deleting item", Snackbar.LENGTH_SHORT).show();
+                final boolean isDir;
+                if (myDirListAdapter.getCurDir().getFile(myLastLongpressName) == null) {
+                    isDir = true;
+                } else {
+                    isDir = false;
                 }
+                if (isDir) {
+                    myDirListAdapter.getDirs().remove(myLastLongpressName);
+                } else {
+                    myDirListAdapter.getFiles().remove(myLastLongpressName);
+                }
+                myDirListAdapter.notifyDataSetChanged();
+                Snackbar.make(myBottomBarCoordinatorLayout, "'" + myLastLongpressName + "' deleted",
+                        Snackbar.LENGTH_SHORT)
+                        .setAction("UNDO", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                myDirListAdapter.refreshTopDir();
+                            }
+                        })
+                        .addCallback(new Snackbar.Callback() {
+                            @Override
+                            public void onDismissed(Snackbar transientBottomBar, int event) {
+                                if (event != Snackbar.Callback.DISMISS_EVENT_ACTION) {
+                                    try {
+                                        DataWriter.getInstance(MyNotes.this).editFolder(myDirListAdapter.getCurPath(),
+                                                myLastLongpressName, null);
+                                    } catch (IOException | JSONException e) {
+                                        e.printStackTrace();
+                                        Snackbar.make(myBottomBarCoordinatorLayout, "Error deleting item",
+                                                Snackbar.LENGTH_SHORT).show();
+                                    }
+                                }
+                                super.onDismissed(transientBottomBar, event);
+
+                            }
+                        })
+                        .show();
                 break;
 
             case R.id.btn_move :
@@ -385,7 +417,14 @@ public class MyNotes extends AppCompatActivity
             }
         } else if (myState == State.RENAMING) {
             try {
-                DataWriter.getInstance(this).editFolder(myDirListAdapter.getCurPath(), myLastLongpressName, newText);
+                File file = myDirListAdapter.getCurDir().getFile(myLastLongpressName);
+                if (file == null) {
+                    // We are renaming a dir.
+                    DataWriter.getInstance(this).editFolder(myDirListAdapter.getCurPath(), myLastLongpressName, newText);
+                } else {
+                    // We are renaming a file.
+                    DataWriter.getInstance(this).editFile(myDirListAdapter.getCurPath(), myLastLongpressName, newText, file.getFileContents());
+                }
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
                 Snackbar.make(myBottomBarCoordinatorLayout, "Error renaming folder", Snackbar.LENGTH_SHORT).show();
