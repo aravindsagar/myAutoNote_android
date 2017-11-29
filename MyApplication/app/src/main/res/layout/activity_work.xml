@@ -127,31 +127,35 @@
         android:visibility="gone"
         >
 
-        <ImageView
+        <ImageButton
             android:id="@+id/headerSize_1"
             android:layout_width="42dp"
             android:layout_height="42dp"
             android:alpha="1"
+            android:foreground="?android:attr/selectableItemBackground"
             android:src="@drawable/ic_text_select" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/headerSize_2"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:alpha="0.9"
+            android:foreground="?android:attr/selectableItemBackground"
             android:src="@drawable/ic_text_select" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/headerSize_3"
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:alpha="0.8"
+            android:foreground="?android:attr/selectableItemBackground"
             android:src="@drawable/ic_text_select" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/headerSize_4"
             android:layout_width="35dp"
             android:layout_height="35dp"
+            android:foreground="?android:attr/selectableItemBackground"
             android:src="@drawable/ic_text_select_black" />
 
 

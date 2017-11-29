@@ -404,14 +404,14 @@ public class WorkActivity extends AppCompatActivity{
                 break;
             case 2:
                 headerButton.setBackgroundResource(R.drawable.ic_text_select);
-                headerButton.setScaleX((float)0.9);
-                headerButton.setScaleY((float)0.9);
+//                headerButton.setScaleX((float)0.9);
+//                headerButton.setScaleY((float)0.9);
                 headerButton.setAlpha((float)0.9);
                 break;
             case 3:
                 headerButton.setBackgroundResource(R.drawable.ic_text_select);
-                headerButton.setScaleX((float)1);
-                headerButton.setScaleY((float)1);
+//                headerButton.setScaleX((float)1);
+//                headerButton.setScaleY((float)1);
                 headerButton.setAlpha((float)1);
                 break;
         }
