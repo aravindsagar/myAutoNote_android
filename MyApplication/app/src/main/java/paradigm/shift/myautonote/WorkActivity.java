@@ -18,6 +18,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
@@ -37,6 +38,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -60,6 +62,8 @@ import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.LineObject;
 import paradigm.shift.myautonote.data_util.DataReader;
 import paradigm.shift.myautonote.data_util.DataWriter;
+
+import static android.provider.MediaStore.EXTRA_OUTPUT;
 
 public class WorkActivity extends AppCompatActivity{
 
@@ -86,6 +90,7 @@ public class WorkActivity extends AppCompatActivity{
     private EditText titleEditor;
     private List<Directory> myNoteDir;
     private String myNoteName;
+    private Uri myLatestImgUri;
 
     private boolean dirty = false;
     private DataWriter dataWriter;
@@ -291,60 +296,28 @@ public class WorkActivity extends AppCompatActivity{
             }
         });
 
-        //Image Stuff
-        //context get file - use this directory
-// set image uri
-        System.out.println("before");
         ImageButton captureButton = (ImageButton) findViewById(R.id.camera_icon);
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d("check", "in onClick");
 
-                Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 File f = null;
                 try{
-                   // Log.d("check","trying makeImageFile");
                     f = makeImageFile();
-                  //  Log.d("check","we survived");
-
-                }catch (IOException ex){
+                } catch (IOException ex){
                     Log.d("check","failed to create file");
                 }
-//                if(intent.resolveActivity(getPackageManager()) != null){
-//                    System.out.print("was not null");
-//                    File f = null;
-//                    try{
-//                        System.out.print("trying makeImageFile");
-//                        f = makeImageFile();
-//                        System.out.print("we survived");
-//
-//                    }catch (IOException ex){
-//                        System.out.print("failed to create file");
-//                    }
-
-                    if(f != null){
-                        Log.d("check", "before uri");
-                        Uri imageURI = FileProvider.getUriForFile(view.getContext(), "com.paradigm.shift.myautonote.fileprovider", f);
-                        intent.putExtra("android.media.EXTRA_OUTPUT", imageURI);
-                        //startActivity(intent);
-                        startActivityForResult(intent, CAMERA_REQUEST);
-                    }
-//                }
-
-
-
+                if(f != null){
+                    Uri imageURI = FileProvider.getUriForFile(WorkActivity.this.getApplicationContext(), "paradigm.shift.myautonote.fileprovider", f);
+                    Log.d("uri", imageURI.toString());
+                    myLatestImgUri = imageURI;
+                    intent.putExtra(EXTRA_OUTPUT, imageURI);
+                    startActivityForResult(intent, CAMERA_REQUEST);
+                }
             }
         });
-
-
-
-        //use imz as tag and add link to where images are stored
-
-
-
-
-
 
         headerButton = (Button) findViewById(R.id.header_button);
         final LinearLayout headerSelectView = (LinearLayout) findViewById(R.id.header_select_view);
@@ -407,7 +380,7 @@ public class WorkActivity extends AppCompatActivity{
         String imageFileName = "JPEG_" + timeStamp + "_";
         //File imageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES); //or getExternalFilesDir
 
-        File imageDir = getFilesDir();
+        File imageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         Log.d("check","finished getfilesdir");
         File image = File.createTempFile(
                 imageFileName,
@@ -427,8 +400,10 @@ public class WorkActivity extends AppCompatActivity{
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-            Log.d("check","hullo");
-
+            Log.d("activity result", myLatestImgUri.toString());
+            ImageView imageView = new ImageView(this);
+            imageView.setImageURI(myLatestImgUri);
+            formattedViewer.addView(imageView);
         }
     }
 
