@@ -52,7 +52,7 @@ public class MyNotes extends AppCompatActivity
         AdapterView.OnItemLongClickListener, CurPathItemClickListener, View.OnClickListener,
         DataChangedListener, EditFinishedListener {
 
-    private static final String NEW_NOTE_CONTENTS = "$0#";
+    private static final String NEW_NOTE_CONTENTS = "";
     private enum State {
         NORMAL, CREATING, RENAMING
     }

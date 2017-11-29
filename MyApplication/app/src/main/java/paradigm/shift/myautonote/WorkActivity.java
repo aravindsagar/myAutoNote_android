@@ -97,9 +97,9 @@ public class WorkActivity extends AppCompatActivity{
 
 
         String givenData = getIntent().getStringExtra("note_content");
+        lineData = new ArrayList<>();
         if(givenData.length() > 0){
             content = givenData.split("<p>");
-            lineData = new ArrayList<LineObject>();
             for(int i = 1; i < content.length; i++){
 
                 TextView newView = createNewTextView(i-1);
