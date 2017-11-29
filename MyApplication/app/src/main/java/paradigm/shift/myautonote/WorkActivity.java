@@ -1,17 +1,23 @@
 package paradigm.shift.myautonote;
 
 
+import android.app.Activity;
 import android.content.Intent;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Layout;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +33,12 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+
 
 import paradigm.shift.myautonote.data_model.LineObject;
 
@@ -48,6 +59,10 @@ public class WorkActivity extends AppCompatActivity{
     private int editorOffset = 0;
     private boolean switchLine = false;
     private Button headerButton;
+
+    //image stuff
+    private static final int CAMERA_REQUEST=1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,7 +170,7 @@ public class WorkActivity extends AppCompatActivity{
 //                            ImageView img = new ImageView(WorkActivity.this);
 //
 //                            img.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-//                            img.setImageResource(R.drawable.action_camera);
+//                            img.setImageResource(R.drawable.action_camera); //use setImageUri
 //                            formattedViewer.addView(img, workingIndex);
                         }
 
@@ -182,19 +197,59 @@ public class WorkActivity extends AppCompatActivity{
             }
         });
 
+        //Image Stuff
+        //context get file - use this directory
+// set image uri
+        System.out.println("before");
         ImageButton captureButton = (ImageButton) findViewById(R.id.camera_icon);
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.d("check", "in onClick");
+
                 Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-                startActivity(intent);
+                File f = null;
+                try{
+                   // Log.d("check","trying makeImageFile");
+                    f = makeImageFile();
+                  //  Log.d("check","we survived");
+
+                }catch (IOException ex){
+                    Log.d("check","failed to create file");
+                }
+//                if(intent.resolveActivity(getPackageManager()) != null){
+//                    System.out.print("was not null");
+//                    File f = null;
+//                    try{
+//                        System.out.print("trying makeImageFile");
+//                        f = makeImageFile();
+//                        System.out.print("we survived");
+//
+//                    }catch (IOException ex){
+//                        System.out.print("failed to create file");
+//                    }
+
+                    if(f != null){
+                        Log.d("check", "before uri");
+                        Uri imageURI = FileProvider.getUriForFile(view.getContext(), "com.paradigm.shift.myautonote.fileprovider", f);
+                        intent.putExtra("android.media.EXTRA_OUTPUT", imageURI);
+                        //startActivity(intent);
+                        startActivityForResult(intent, CAMERA_REQUEST);
+                    }
+//                }
+
+
+
             }
-        }
+        });
+
+
+
+        //use imz as tag and add link to where images are stored
 
 
 
 
-    );
 
 
         headerButton = (Button) findViewById(R.id.header_button);
@@ -241,6 +296,43 @@ public class WorkActivity extends AppCompatActivity{
             }
         });
 
+    }
+
+
+
+    //More image stuff
+    String currPath;
+
+    private File makeImageFile() throws IOException{
+        Log.d("check", "a whole new world");
+
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        //File imageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES); //or getExternalFilesDir
+
+        File imageDir = getFilesDir();
+        Log.d("check","finished getfilesdir");
+        File image = File.createTempFile(
+                imageFileName,
+                ".jpg",
+                imageDir
+        );
+
+        currPath = image.getAbsolutePath();
+
+        Log.d("check", currPath);
+
+        return image;
+    }
+
+//Image Stuff
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
+            Log.d("check","hullo");
+
+        }
     }
 
     public View.OnClickListener onClickLineListener = new View.OnClickListener() {
