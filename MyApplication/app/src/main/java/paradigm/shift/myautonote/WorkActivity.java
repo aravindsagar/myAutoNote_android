@@ -1,12 +1,12 @@
 package paradigm.shift.myautonote;
 
 
-
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -21,6 +21,7 @@ import android.text.Editable;
 import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,8 +36,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
-import org.json.JSONException;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +77,7 @@ public class WorkActivity extends AppCompatActivity{
     private List<Directory> myNoteDir;
     private String myNoteName;
     private Uri myLatestImgUri;
-
+    private int myMaxImgHeight, myMaxImgWidth;
     private boolean dirty = false;
     private DataWriter dataWriter;
 
@@ -135,7 +134,11 @@ public class WorkActivity extends AppCompatActivity{
                 return false;
             }
         });
-
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        myMaxImgHeight = size.y/2;
+        myMaxImgWidth = size.x/2;
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -384,8 +387,11 @@ public class WorkActivity extends AppCompatActivity{
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             Log.d("activity result", myLatestImgUri.toString());
             ImageView imageView = new ImageView(this);
+            imageView.setMaxHeight(myMaxImgHeight);
+            imageView.setMaxWidth(myMaxImgWidth);
+            imageView.setAdjustViewBounds(true);
             imageView.setImageURI(myLatestImgUri);
-            formattedViewer.addView(imageView);
+            formattedViewer.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         }
     }
 
