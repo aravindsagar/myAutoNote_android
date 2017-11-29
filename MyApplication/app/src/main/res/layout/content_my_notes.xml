@@ -1,101 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:id="@+id/parent_layout">
-
-    <!-- Linear layout for 3 suggestions at top. -->
+    app:layout_behavior="@string/appbar_scrolling_view_behavior" tools:context="paradigm.shift.myautonote.MyNotes"
+    tools:showIn="@layout/app_bar_my_notes"
+    android:layout_marginBottom="@dimen/bottom_bar_height">
     <LinearLayout
-        android:id="@+id/suggestion_layout"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <Space
-            android:layout_width="0dp"
+        android:orientation="vertical"
+        android:id="@+id/parent_layout">
+
+        <!-- Linear layout for 3 suggestions at top. -->
+        <LinearLayout
+            android:id="@+id/suggestion_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="0.8"
+                android:minWidth="8dp">
+            </Space>
+            <Button
+                android:id="@+id/btn_suggestion_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/SuggestionButton"/>
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:minWidth="10dp">
+            </Space>
+            <Button
+                android:id="@+id/btn_suggestion_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/SuggestionButton"/>
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:minWidth="10dp">
+            </Space>
+            <Button
+                android:id="@+id/btn_suggestion_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/SuggestionButton"/>
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:minWidth="8dp"
+                android:layout_weight="0.8" >
+            </Space>
+
+        </LinearLayout>
+
+        <!-- Horizontal list for current directory path. -->
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/cur_path_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="horizontal"
+            android:visibility="gone" />
+
+        <!-- List view for showing the directory structure.  -->
+        <ListView
+            android:id="@+id/list_view_dir_list"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.8"
-            android:minWidth="8dp">
-        </Space>
-        <Button
-            android:id="@+id/btn_suggestion_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/SuggestionButton"/>
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
             android:layout_weight="1"
-            android:minWidth="10dp">
-        </Space>
-        <Button
-            android:id="@+id/btn_suggestion_2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/SuggestionButton"/>
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1"
-            android:minWidth="10dp">
-        </Space>
-        <Button
-            android:id="@+id/btn_suggestion_3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@style/SuggestionButton"/>
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:minWidth="8dp"
-            android:layout_weight="0.8" >
-        </Space>
+            android:descendantFocusability="afterDescendants">
+        </ListView>
+
 
     </LinearLayout>
-
-    <!-- Horizontal list for current directory path. -->
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/cur_path_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="horizontal"
-        android:visibility="gone" />
-
-    <!-- List view for showing the directory structure.  -->
-    <ListView
-        android:id="@+id/list_view_dir_list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:descendantFocusability="afterDescendants">
-    </ListView>
-
-    <!-- Buttons at bottom -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <Button
-            android:id="@+id/btn_new_folder"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            style="@style/NewButton"
-            android:text="@string/new_folder"
-            android:drawableStart="@drawable/ic_action_new_folder"/>
-        <Space
-            android:layout_width="2dp"
-            android:layout_height="match_parent" />
-        <Button
-            android:id="@+id/btn_new_note"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:drawableStart="@drawable/ic_action_new_file"
-            android:text="@string/new_note"
-            style="@style/NewButton" />
-    </LinearLayout>
-
-
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

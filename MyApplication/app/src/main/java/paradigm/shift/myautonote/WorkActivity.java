@@ -1,6 +1,7 @@
 package paradigm.shift.myautonote;
 
 
+
 import android.app.Activity;
 import android.content.Intent;
 import android.animation.Animator;
@@ -9,29 +10,41 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Environment;
+
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.CountDownTimer;
+
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
+
+
+import android.view.KeyEvent;
+
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-
 import android.widget.ImageButton;
-
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +53,18 @@ import java.util.ArrayList;
 import java.util.Date;
 
 
+import org.json.JSONException;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+
+import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.LineObject;
+import paradigm.shift.myautonote.data_util.DataReader;
+import paradigm.shift.myautonote.data_util.DataWriter;
 
 public class WorkActivity extends AppCompatActivity{
 
@@ -59,6 +83,13 @@ public class WorkActivity extends AppCompatActivity{
     private int editorOffset = 0;
     private boolean switchLine = false;
     private Button headerButton;
+    private TextView titleView;
+    private EditText titleEditor;
+    private List<Directory> myNoteDir;
+    private String myNoteName;
+
+    private boolean dirty = false;
+    private DataWriter dataWriter;
 
     //image stuff
     private static final int CAMERA_REQUEST=1;
@@ -69,22 +100,68 @@ public class WorkActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
 
-        //TODO- does not work
+        String[] curPath = getIntent().getStringArrayExtra("cur_dir");
+        Directory dir = DataReader.getInstance(this).getTopDir();
+        myNoteDir = new ArrayList<>();
+        myNoteDir.add(dir);
+        for (int i = 1; i < curPath.length; i++) {
+            dir = dir.getSubDirectory(curPath[i]);
+            myNoteDir.add(dir);
+        }
+
+        dataWriter = DataWriter.getInstance(WorkActivity.this);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.work_toolbar);
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        titleView = toolbar.findViewById(R.id.text_note_name);
+        titleEditor = toolbar.findViewById(R.id.edit_note_name);
+        myNoteName = getIntent().getStringExtra("note_title");
+        titleView.setText(myNoteName);
+        titleView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                titleEditor.setText(myNoteName);
+                titleEditor.setSelectAllOnFocus(true);
+                titleView.setVisibility(View.GONE);
+                titleEditor.setVisibility(View.VISIBLE);
+                titleEditor.requestFocus();
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(titleEditor, 0);
+            }
+        });
+        titleEditor.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    try {
+                        DataWriter.getInstance(WorkActivity.this).editFile(myNoteDir, myNoteName, titleEditor.getText().toString(),
+                                getIntent().getStringExtra("note_content")); // TODO replace with current contents.
+                        myNoteName = titleEditor.getText().toString();
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
+                    titleView.setText(myNoteName);
+                    titleEditor.setVisibility(View.GONE);
+                    titleView.setVisibility(View.VISIBLE);
+                    return true;
+                }
+                return false;
+            }
+        });
 
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        setTitle(getIntent().getStringExtra("note_title"));
 
         formattedViewer = (LinearLayout) findViewById(R.id.formatted_viewer);
         scrollView = (ScrollView) findViewById(R.id.scrollable_viewer);
 
 
         String givenData = getIntent().getStringExtra("note_content");
+        lineData = new ArrayList<>();
         if(givenData.length() > 0){
             content = givenData.split("<p>");
-            lineData = new ArrayList<LineObject>();
             for(int i = 1; i < content.length; i++){
 
                 TextView newView = createNewTextView(i-1);
@@ -168,6 +245,7 @@ public class WorkActivity extends AppCompatActivity{
                             lineData.add(workingIndex, lo);
                             formattedViewer.addView(currentLine, workingIndex);
 //                            ImageView img = new ImageView(WorkActivity.this);
+//                            img.setImageURI(new File(getFilesDir(), imgFileName).toURI());
 //
 //                            img.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 //                            img.setImageResource(R.drawable.action_camera); //use setImageUri
@@ -194,6 +272,23 @@ public class WorkActivity extends AppCompatActivity{
                         }
                     }, 150);
                 }
+
+                if(!dirty){
+                    dirty = true;
+                    Handler handler1 = new Handler();
+                        handler1.postDelayed(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                save();
+                            }
+                        }, 1000);
+
+                }
+
+
+
+
             }
         });
 
@@ -295,6 +390,9 @@ public class WorkActivity extends AppCompatActivity{
 
             }
         });
+
+
+
 
     }
 
@@ -441,17 +539,34 @@ public class WorkActivity extends AppCompatActivity{
                 break;
             case 2:
                 headerButton.setBackgroundResource(R.drawable.ic_text_select);
-                headerButton.setScaleX((float)0.9);
-                headerButton.setScaleY((float)0.9);
+//                headerButton.setScaleX((float)0.9);
+//                headerButton.setScaleY((float)0.9);
                 headerButton.setAlpha((float)0.9);
                 break;
             case 3:
                 headerButton.setBackgroundResource(R.drawable.ic_text_select);
-                headerButton.setScaleX((float)1);
-                headerButton.setScaleY((float)1);
+//                headerButton.setScaleX((float)1);
+//                headerButton.setScaleY((float)1);
                 headerButton.setAlpha((float)1);
                 break;
         }
+    }
+
+    private void save(){
+        String result = "";
+        for(int i = 0; i < lineData.size(); i++){
+            result += lineData.get(i).toString();
+        }
+        //dir, final String newFileName, final String contents
+        try {
+            dataWriter.editFile(myNoteDir, myNoteName, null, result);
+            dirty = false;
+            //Log.d("saved", "save: ");
+        }catch (Exception e){
+
+        }
+
+        //Log.d("RESULT", result);
     }
 
 

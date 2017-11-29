@@ -102,17 +102,45 @@ public class DataWriter {
     }
 
     /**
-     * Creates a new folder in the given destination.
+     * Creates a new file in the given destination.
      */
-    public void addFile(final List<Directory> dir, final String newDirName) {
-
+    public void addFile(final List<Directory> dir, final String newFileName, final String contents) throws IOException, JSONException {
+        Log.d("DataWriter", "Creating new folder " + newFileName);
+        File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
+        JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
+        JSONObject jDir = jsonObject.getJSONObject("files");
+        for (int i = 1; i < dir.size(); i++) {
+            jDir = jDir.getJSONObject(dir.get(i).getName());
+        }
+        jDir.put(newFileName, contents);
+        writeData(jsonObject.toString());
+        notifyDataReader();
     }
 
     /**
-     * Renames the requested folder. If destination is null, deletes the folder.
+     * Edits the given file. If destination is not null and is different from source, the file will
+     * be renamed.
      */
-    public void editFile(final List<Directory> dir, final String source, final String destination) {
+    public void editFile(final List<Directory> dir, final String source, final String destination, final String contents)
+            throws IOException, JSONException {
+        Log.d("DataWriter", "Editing file " + source);
+        File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
+        JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
+        JSONObject jDir = jsonObject.getJSONObject("files");
+        for (int i = 1; i < dir.size(); i++) {
+            jDir = jDir.getJSONObject(dir.get(i).getName());
+        }
 
+        if (destination != null) {
+            jDir.put(destination, contents);
+            if (!source.equals(destination)) {
+                jDir.remove(source);
+            }
+        } else {
+            jDir.put(source, contents);
+        }
+        writeData(jsonObject.toString());
+        notifyDataReader();
     }
 
     private void writeData(String data) throws IOException {
@@ -121,6 +149,7 @@ public class DataWriter {
         outputStream.write(data.getBytes());
         outputStream.close();
     }
+
     private void notifyDataReader() {
         DataReader.getInstance(myContext).invalidateData();
     }

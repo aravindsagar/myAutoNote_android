@@ -17,6 +17,8 @@ import paradigm.shift.myautonote.R;
 
 public class LineObject {
 
+    public boolean imageType = false;
+
     public int index;
     public String content;
     public int headerSize = 0;
@@ -38,11 +40,6 @@ public class LineObject {
         pad3 = p3;
 
         working = w;
-
-
-
-
-
     }
 
     public void copyPaddingFromPreviousLine(LineObject other){
@@ -163,7 +160,6 @@ public class LineObject {
         if(hs > 6)
             hs =  6;
         headerSize = hs;
-        Log.v("header1", ""+headerSize);
     }
 
 
@@ -200,7 +196,6 @@ public class LineObject {
             }
 
         }
-        Log.v("header", ""+headerSize);
 
     }
 
@@ -216,6 +211,14 @@ public class LineObject {
             return true;
         else
             return false;
+    }
+
+    public String toString(){
+        String result = "<p>" + content;
+        for(int i = 0; i < headerSize; i++){
+            result+="`";
+        }
+        return result + "</p>";
     }
 }
 

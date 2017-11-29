@@ -12,6 +12,31 @@
         android:layout_gravity="top"
         android:orientation="vertical">
 
+        <android.support.design.widget.AppBarLayout android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:theme="@style/AppTheme.AppBarOverlay">
+
+            <android.support.v7.widget.Toolbar android:id="@+id/work_toolbar"
+                android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary" app:popupTheme="@style/AppTheme.PopupOverlay" >
+                <TextView
+                    android:id="@+id/text_note_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"/>
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:id="@+id/edit_note_name"
+                    android:singleLine="true"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="20dp"/>
+            </android.support.v7.widget.Toolbar>
+
+        </android.support.design.widget.AppBarLayout>
 
         <ScrollView
             android:id="@+id/scrollable_viewer"
@@ -103,31 +128,35 @@
         android:visibility="gone"
         >
 
-        <ImageView
+        <ImageButton
             android:id="@+id/headerSize_1"
             android:layout_width="42dp"
             android:layout_height="42dp"
             android:alpha="1"
+            android:foreground="?android:attr/selectableItemBackground"
             android:src="@drawable/ic_text_select" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/headerSize_2"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:alpha="0.9"
+            android:foreground="?android:attr/selectableItemBackground"
             android:src="@drawable/ic_text_select" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/headerSize_3"
             android:layout_width="38dp"
             android:layout_height="38dp"
             android:alpha="0.8"
+            android:foreground="?android:attr/selectableItemBackground"
             android:src="@drawable/ic_text_select" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/headerSize_4"
             android:layout_width="35dp"
             android:layout_height="35dp"
+            android:foreground="?android:attr/selectableItemBackground"
             android:src="@drawable/ic_text_select_black" />
 
 

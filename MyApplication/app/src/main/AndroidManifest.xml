@@ -29,7 +29,8 @@
         </activity>
 
         <activity android:name=".WorkActivity"
-            android:parentActivityName=".MyNotes"></activity>
+            android:parentActivityName=".MyNotes"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
