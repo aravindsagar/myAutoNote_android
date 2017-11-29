@@ -38,11 +38,6 @@ public class LineObject {
         pad3 = p3;
 
         working = w;
-
-
-
-
-
     }
 
     public void copyPaddingFromPreviousLine(LineObject other){
@@ -216,6 +211,14 @@ public class LineObject {
             return true;
         else
             return false;
+    }
+
+    public String toString(){
+        String result = "<p>" + content;
+        for(int i = 0; i < headerSize; i++){
+            result+="`";
+        }
+        return result + "</p>";
     }
 }
 

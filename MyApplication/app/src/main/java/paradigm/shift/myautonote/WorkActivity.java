@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.Layout;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -234,6 +235,8 @@ public class WorkActivity extends AppCompatActivity{
                         }
                     }, 150);
                 }
+
+                save();
             }
         });
 
@@ -415,6 +418,14 @@ public class WorkActivity extends AppCompatActivity{
                 headerButton.setAlpha((float)1);
                 break;
         }
+    }
+
+    private void save(){
+        String result = "";
+        for(int i = 0; i < lineData.size(); i++){
+            result += lineData.get(i).toString();
+        }
+        Log.d("RESULT", result);
     }
 
 
