@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -61,6 +62,9 @@ public class WorkActivity extends AppCompatActivity{
     private List<Directory> myNoteDir;
     private String myNoteName;
 
+    private boolean dirty = false;
+    private DataWriter dataWriter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +78,8 @@ public class WorkActivity extends AppCompatActivity{
             dir = dir.getSubDirectory(curPath[i]);
             myNoteDir.add(dir);
         }
+
+        dataWriter = DataWriter.getInstance(WorkActivity.this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.work_toolbar);
         setSupportActionBar(toolbar);
@@ -236,7 +242,22 @@ public class WorkActivity extends AppCompatActivity{
                     }, 150);
                 }
 
-                save();
+                if(!dirty){
+                    dirty = true;
+                    Handler handler1 = new Handler();
+                        handler1.postDelayed(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                save();
+                            }
+                        }, 1000);
+
+                }
+
+
+
+
             }
         });
 
@@ -298,6 +319,9 @@ public class WorkActivity extends AppCompatActivity{
 
             }
         });
+
+
+
 
     }
 
@@ -425,7 +449,16 @@ public class WorkActivity extends AppCompatActivity{
         for(int i = 0; i < lineData.size(); i++){
             result += lineData.get(i).toString();
         }
-        Log.d("RESULT", result);
+        //dir, final String newFileName, final String contents
+        try {
+            dataWriter.editFile(myNoteDir, myNoteName, null, result);
+            dirty = false;
+            //Log.d("saved", "save: ");
+        }catch (Exception e){
+
+        }
+
+        //Log.d("RESULT", result);
     }
 
 

@@ -17,6 +17,8 @@ import paradigm.shift.myautonote.R;
 
 public class LineObject {
 
+    public boolean imageType = false;
+
     public int index;
     public String content;
     public int headerSize = 0;
@@ -158,7 +160,6 @@ public class LineObject {
         if(hs > 6)
             hs =  6;
         headerSize = hs;
-        Log.v("header1", ""+headerSize);
     }
 
 
@@ -195,7 +196,6 @@ public class LineObject {
             }
 
         }
-        Log.v("header", ""+headerSize);
 
     }
 
