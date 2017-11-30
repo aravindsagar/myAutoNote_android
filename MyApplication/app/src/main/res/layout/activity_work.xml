@@ -82,7 +82,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_text_select"
-                android:foreground="?android:attr/selectableItemBackground"
+                android:background="?android:attr/selectableItemBackground"
                 android:padding="12dp"/>
 
 

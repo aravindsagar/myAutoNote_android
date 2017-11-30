@@ -2,6 +2,7 @@ package paradigm.shift.myautonote.data_model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,13 @@ import java.util.Map;
  */
 
 public class Directory extends DataItem {
+
+    Comparator<String> caseInsensitiveComparator = new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {
+            return o1.toLowerCase().compareTo(o2.toLowerCase());
+        }
+    };
 
     // Items inside the directory can be stored as a map from name to item.
     private final Map<String, Directory> mySubDirs;
@@ -24,13 +32,13 @@ public class Directory extends DataItem {
 
     public List<String> getSubdirectoryNames() {
         List<String> dirNames = new ArrayList<>(mySubDirs.keySet());
-        Collections.sort(dirNames);
+        Collections.sort(dirNames, caseInsensitiveComparator);
         return dirNames;
     }
 
     public List<String> getFileNames() {
         List<String> fileNames = new ArrayList<>(myFiles.keySet());
-        Collections.sort(fileNames);
+        Collections.sort(fileNames, caseInsensitiveComparator);
         return fileNames;
     }
 
