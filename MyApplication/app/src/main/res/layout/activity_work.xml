@@ -110,6 +110,12 @@
 
     </LinearLayout>
 
+    <View
+        android:id="@+id/close_header_select"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
     <LinearLayout
         android:id="@+id/header_select_view"
         android:layout_width="wrap_content"

@@ -79,6 +79,7 @@ public class WorkActivity extends AppCompatActivity{
     private boolean dirty = false;
     private DataWriter dataWriter;
     private LinearLayout headerSelectView;
+    private View closeHeaderSelect;
 
     //image stuff
     private static final int CAMERA_REQUEST=1;
@@ -299,11 +300,43 @@ public class WorkActivity extends AppCompatActivity{
 
         headerButton = findViewById(R.id.header_button);
         headerSelectView = (LinearLayout) findViewById(R.id.header_select_view);
+        closeHeaderSelect = (View) findViewById(R.id.close_header_select);
+
+        closeHeaderSelect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                closeHeaderSelect.setVisibility(View.GONE);
+                if(headerSelectView.getVisibility() == View.VISIBLE){
+
+                    ObjectAnimator a = ObjectAnimator.ofFloat(headerSelectView, "alpha", 1, 0);
+                    a.setCurrentPlayTime(150);
+
+                    a.addListener(new Animator.AnimatorListener() {
+                        @Override
+                        public void onAnimationStart(Animator animator) {  }
+
+                        @Override
+                        public void onAnimationEnd(Animator animator) {
+                            headerSelectView.setVisibility(View.GONE);
+                        }
+
+                        @Override
+                        public void onAnimationCancel(Animator animator) { }
+
+                        @Override
+                        public void onAnimationRepeat(Animator animator) { }
+                    });
+                    a.start();
+
+                }
+            }
+        });
 
         headerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(headerSelectView.getVisibility() == View.VISIBLE){
+                    closeHeaderSelect.setVisibility(View.GONE);
 
                     ObjectAnimator a = ObjectAnimator.ofFloat(headerSelectView, "alpha", 1, 0);
                     a.setCurrentPlayTime(150);
@@ -336,6 +369,7 @@ public class WorkActivity extends AppCompatActivity{
                     ObjectAnimator a = ObjectAnimator.ofFloat(headerSelectView, "alpha", 0, 1);
                     a.setCurrentPlayTime(150);
                     a.start();
+                    closeHeaderSelect.setVisibility(View.VISIBLE);
                 }
 
             }
