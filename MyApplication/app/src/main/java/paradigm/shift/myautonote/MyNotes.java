@@ -70,6 +70,8 @@ public class MyNotes extends AppCompatActivity
     private Dialog myBottomDialog;
     private Handler myHandler;
     private CoordinatorLayout myBottomBarCoordinatorLayout;
+    private Button myNewFolderBtn;
+    private Button myNewNoteBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,10 +111,10 @@ public class MyNotes extends AppCompatActivity
         myCurPathView.setLayoutManager(mLayoutManager);
         myCurPathView.addItemDecoration(dividerItemDecoration);
 
-        Button newFolderBtn = (Button)findViewById(R.id.btn_new_folder),
-                newNoteBtn = (Button) findViewById(R.id.btn_new_note);
-        newFolderBtn.setOnClickListener(this);
-        newNoteBtn.setOnClickListener(this);
+        myNewFolderBtn = (Button)findViewById(R.id.btn_new_folder);
+        myNewNoteBtn = (Button) findViewById(R.id.btn_new_note);
+        myNewFolderBtn.setOnClickListener(this);
+        myNewNoteBtn.setOnClickListener(this);
 
         myBottomBarCoordinatorLayout = findViewById(R.id.coordinator_bottom_bar);
 
@@ -130,8 +132,29 @@ public class MyNotes extends AppCompatActivity
         } else {
             mySuggestionsLayout.setVisibility(View.VISIBLE);
             suggeston1.setText(topDir.getSubdirectoryNames().get(0));
+            suggeston1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    myDirListAdapter.itemClick(0);
+                    myNewNoteBtn.performClick();
+                }
+            });
             suggeston2.setText(topDir.getSubdirectoryNames().get(1));
+            suggeston2.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    myDirListAdapter.itemClick(1);
+                    myNewNoteBtn.performClick();
+                }
+            });
             suggeston3.setText(topDir.getSubdirectoryNames().get(2));
+            suggeston3.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    myDirListAdapter.itemClick(2);
+                    myNewNoteBtn.performClick();
+                }
+            });
         }
 
         // TODO create a new note when user clicks any of the suggestions!
