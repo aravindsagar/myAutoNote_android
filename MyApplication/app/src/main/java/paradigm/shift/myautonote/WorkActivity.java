@@ -232,12 +232,6 @@ public class WorkActivity extends AppCompatActivity{
                         }else{
                             lineData.add(workingIndex, lo);
                             formattedViewer.addView(currentLine, workingIndex);
-//                            ImageView img = new ImageView(WorkActivity.this);
-//                            img.setImageURI(new File(getFilesDir(), imgFileName).toURI());
-//
-//                            img.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-//                            img.setImageResource(R.drawable.action_camera); //use setImageUri
-//                            formattedViewer.addView(img, workingIndex);
                         }
 
                         switchLine = false;
@@ -386,11 +380,20 @@ public class WorkActivity extends AppCompatActivity{
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             Log.d("activity result", myLatestImgUri.toString());
             ImageView imageView = new ImageView(this);
-            imageView.setMaxHeight(myMaxImgHeight);
-            imageView.setMaxWidth(myMaxImgWidth);
+//            imageView.setMaxHeight(myMaxImgHeight);
+//            imageView.setMaxWidth(myMaxImgWidth);
             imageView.setAdjustViewBounds(true);
             imageView.setImageURI(myLatestImgUri);
-            formattedViewer.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+            //formattedViewer.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+            Display display = getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+
+            imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,(int)(size.x*0.5)));
+            imageView.setPadding(0,12,0,12);
+            formattedViewer.addView(imageView, workingIndex);
         }
     }
 
@@ -417,7 +420,7 @@ public class WorkActivity extends AppCompatActivity{
                 currentLine.setBackgroundColor(ContextCompat.getColor(WorkActivity.this, R.color.textHighlight));
                 editor.requestFocus();
                 switchLine = false;
-
+                changeHeaderButtonValue(lineData.get(workingIndex).headerSize);
             }
 
 
@@ -455,6 +458,7 @@ public class WorkActivity extends AppCompatActivity{
                         int line = layout.getLineForVertical(y);
                         editorOffset = layout.getOffsetForHorizontal(line, x-view.getPaddingLeft());
                     }
+
             }
             return false;
         }
@@ -511,28 +515,28 @@ public class WorkActivity extends AppCompatActivity{
         //Log.d("VAL", val + "");
         switch (val){
             case 0:
-                headerButton.setBackgroundResource(R.drawable.ic_text_select_black);
+                headerButton.setImageResource(R.drawable.ic_text_select_black);
 //                headerButton.setScaleX((float)1);
 //                headerButton.setScaleY((float)1);
                 headerButton.setAlpha((float)1);
                 break;
             case 1:
-                headerButton.setBackgroundResource(R.drawable.ic_text_select);
+                headerButton.setImageResource(R.drawable.ic_text_select);
 //                headerButton.setScaleX((float)0.7);
 //                headerButton.setScaleY((float)0.7);
-                headerButton.setAlpha((float)0.6);
+                headerButton.setAlpha((float)1);
                 break;
             case 2:
-                headerButton.setBackgroundResource(R.drawable.ic_text_select);
+                headerButton.setImageResource(R.drawable.ic_text_select);
 //                headerButton.setScaleX((float)0.9);
 //                headerButton.setScaleY((float)0.9);
                 headerButton.setAlpha((float)0.8);
                 break;
             case 3:
-                headerButton.setBackgroundResource(R.drawable.ic_text_select);
+                headerButton.setImageResource(R.drawable.ic_text_select);
 //                headerButton.setScaleX((float)1);
 //                headerButton.setScaleY((float)1);
-                headerButton.setAlpha((float)1);
+                headerButton.setAlpha((float)0.6);
                 break;
         }
     }
