@@ -131,8 +131,10 @@ public class MyNotes extends AppCompatActivity
             mySuggestionsLayout.setVisibility(View.VISIBLE);
             suggeston1.setText(topDir.getSubdirectoryNames().get(0));
             suggeston2.setText(topDir.getSubdirectoryNames().get(1));
-            suggeston3.setText(topDir.getSubdirectoryNames().get(1));
+            suggeston3.setText(topDir.getSubdirectoryNames().get(2));
         }
+
+        // TODO create a new note when user clicks any of the suggestions!
     }
 
     /**

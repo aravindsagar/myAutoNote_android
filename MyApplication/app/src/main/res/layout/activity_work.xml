@@ -75,30 +75,31 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center"
-            android:padding="6dp">
+            android:gravity="center">
 
-            <Button
+            <ImageView
                 android:id="@+id/header_button"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:background="@drawable/ic_text_select"
-                android:foreground="?android:attr/selectableItemBackground"/>
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_text_select"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:padding="12dp"/>
 
 
             <EditText
                 android:id="@+id/edit_box"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="2"
+                android:layout_weight="1"
                 android:hint="new line"/>
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/camera_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="#ffffff"
-                android:src="@drawable/ic_camera_grey"/>
+                android:background="?android:attr/selectableItemBackground"
+                android:src="@drawable/ic_camera_grey"
+                android:padding="12dp"/>
 
 
         </LinearLayout>
@@ -117,47 +118,43 @@
         android:elevation="6dp"
         android:gravity="bottom"
         android:orientation="horizontal"
-        android:paddingBottom="2dp"
+        android:paddingBottom="4dp"
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
-        android:paddingTop="2dp"
+        android:paddingTop="6dp"
         android:translationZ="6dp"
         android:layout_gravity="bottom"
         android:layout_marginBottom="60dp"
         android:layout_marginLeft="6dp"
-        android:visibility="gone"
-        >
+        android:visibility="gone" >
 
         <ImageButton
             android:id="@+id/headerSize_1"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
             android:alpha="1"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:src="@drawable/ic_text_select" />
+            android:src="@drawable/ic_text_select"
+            android:padding="0dp"
+            style="@style/HeaderLevelButton"/>
 
         <ImageButton
             android:id="@+id/headerSize_2"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
             android:alpha="0.9"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:src="@drawable/ic_text_select" />
+            android:src="@drawable/ic_text_select"
+            android:paddingTop="6dp"
+            style="@style/HeaderLevelButton" />
 
         <ImageButton
             android:id="@+id/headerSize_3"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
             android:alpha="0.8"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:src="@drawable/ic_text_select" />
+            android:src="@drawable/ic_text_select"
+            android:paddingTop="10dp"
+            style="@style/HeaderLevelButton" />
 
         <ImageButton
             android:id="@+id/headerSize_4"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:src="@drawable/ic_text_select_black" />
+            android:src="@drawable/ic_text_select_black"
+            android:paddingTop="14dp"
+            android:alpha="0.8"
+            style="@style/HeaderLevelButton" />
 
 
     </LinearLayout>

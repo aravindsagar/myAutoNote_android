@@ -2,6 +2,8 @@ package paradigm.shift.myautonote.adapter;
 
 import android.content.Context;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -26,7 +28,7 @@ import paradigm.shift.myautonote.data_util.DataReader;
  * Created by aravind on 11/19/17.
  */
 
-public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActionListener, View.OnFocusChangeListener {
+public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActionListener, View.OnFocusChangeListener, TextWatcher {
 
     private static class ViewHolder {
 
@@ -51,6 +53,8 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
     private int myEditablePosition = -1;
     private EditFinishedListener myEditFinishedListener;
     private Handler myHandler;
+    private EditText myEditableField;
+    private int myEditableFocusCount = 0;
 
     public DirListAdapter(final Context context) {
         myTopDir = DataReader.getInstance(context).getTopDir();
@@ -157,17 +161,22 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
             holder.editText.setText(item);
             holder.editText.setOnEditorActionListener(this);
             holder.editText.setOnFocusChangeListener(this);
-            final ViewHolder finalHolder = holder;
-            myHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    finalHolder.editText.setSelectAllOnFocus(true);
-                    finalHolder.editText.requestFocus();
-                    InputMethodManager imm = (InputMethodManager)myContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.showSoftInput(finalHolder.editText, 0);
-                    finalHolder.editText.setSelection(0, finalHolder.editText.getText().length());
-                }
-            }, 300);
+            holder.editText.addTextChangedListener(this);
+            myEditableField = holder.editText;
+            myEditableFocusCount += 1;
+            if (myEditableFocusCount <= 5) {
+                final ViewHolder finalHolder = holder;
+                myHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        finalHolder.editText.setSelectAllOnFocus(true);
+                        finalHolder.editText.requestFocus();
+                        InputMethodManager imm = (InputMethodManager) myContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.showSoftInput(finalHolder.editText, 0);
+                        finalHolder.editText.setSelection(0, finalHolder.editText.getText().length());
+                    }
+                }, 300);
+            }
         } else {
             holder.textView.setVisibility(View.VISIBLE);
             holder.editText.setVisibility(View.GONE);
@@ -187,6 +196,9 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
      * Returns true if we have a parent dir, false otherwise.
      */
     public boolean goBack() {
+        if (myEditablePosition != -1 && myEditableField != null) {
+            return onEditorAction(myEditableField, EditorInfo.IME_ACTION_DONE, null);
+        }
         if (myCurDir.getParent() != null) {
             setCurDir(myCurDir.getParent());
             myCurPath.remove(myCurPath.size()-1);
@@ -213,6 +225,7 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
     public void setEditable(int position, EditFinishedListener listener) {
         myEditablePosition = position;
         myEditFinishedListener = listener;
+        myEditableFocusCount = 0;
     }
 
     public boolean isInTopDir() {
@@ -235,8 +248,8 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
 
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        Log.d("Dir list adapter", "On editor action");
         if (actionId == EditorInfo.IME_ACTION_DONE) {
-            Log.d("Dir list adapter", "On editor action");
             if (myEditFinishedListener != null) {
                 Log.d("Dir list adapter", "Calling listener with newText " + ((TextView) v).getText().toString());
                 myEditFinishedListener.onEditFinished(myEditablePosition, ((TextView) v).getText().toString());
@@ -250,11 +263,37 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
         if (hasFocus) {
-            Log.d("Dir list adapter", "has focus");
+//            Log.d("Dir list adapter", "has focus");
 //            ((Activity) myContext).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         } else {
             Log.d("Dir list adapter", "lost focus");
+            String newText = ((TextView) v).getText().toString();
+            setItemName(myEditablePosition, newText);
+        }
+    }
 
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        setItemName(myEditablePosition, s.toString());
+    }
+
+    private void setItemName(int position, String value) {
+        if (position >= 0) {
+            if (position < myDirs.size()) {
+                myDirs.set(position, value);
+            } else {
+                myFiles.set(position - myDirs.size(), value);
+            }
         }
     }
 }

@@ -29,9 +29,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -71,7 +69,7 @@ public class WorkActivity extends AppCompatActivity{
     private EditText editor;
     private int editorOffset = 0;
     private boolean switchLine = false;
-    private Button headerButton;
+    private ImageView headerButton;
     private TextView titleView;
     private EditText titleEditor;
     private List<Directory> myNoteDir;
@@ -80,6 +78,7 @@ public class WorkActivity extends AppCompatActivity{
     private int myMaxImgHeight, myMaxImgWidth;
     private boolean dirty = false;
     private DataWriter dataWriter;
+    private LinearLayout headerSelectView;
 
     //image stuff
     private static final int CAMERA_REQUEST=1;
@@ -281,7 +280,7 @@ public class WorkActivity extends AppCompatActivity{
             }
         });
 
-        ImageButton captureButton = (ImageButton) findViewById(R.id.camera_icon);
+        ImageView captureButton = findViewById(R.id.camera_icon);
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -304,8 +303,8 @@ public class WorkActivity extends AppCompatActivity{
             }
         });
 
-        headerButton = (Button) findViewById(R.id.header_button);
-        final LinearLayout headerSelectView = (LinearLayout) findViewById(R.id.header_select_view);
+        headerButton = findViewById(R.id.header_button);
+        headerSelectView = (LinearLayout) findViewById(R.id.header_select_view);
 
         headerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -457,6 +456,15 @@ public class WorkActivity extends AppCompatActivity{
             return false;
         }
     };
+
+    @Override
+    public void onBackPressed() {
+        if(headerSelectView.getVisibility() == View.VISIBLE) {
+            headerButton.performClick();
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     private void formatLines(int startIndex){
         for(int i = startIndex; i < lineData.size(); i++){
