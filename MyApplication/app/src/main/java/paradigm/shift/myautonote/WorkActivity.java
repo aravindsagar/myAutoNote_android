@@ -158,16 +158,44 @@ public class WorkActivity extends AppCompatActivity{
                 TextView newView = createNewTextView(i-1);
 
                 String parsableText = "";
-                if(content[i].length() > 4 && content[i].substring(content[i].length()-4).equals("</p>"))
-                    parsableText = content[i].substring(0, content[i].length()-4);
-                else
+                Boolean img = false;
+                if(content[i].length() > 4){
+                    if(content[i].substring(content[i].length()-4).equals("</p>")){
+                        parsableText = content[i].substring(0, content[i].length()-4);
+                    }else if(content[i].substring(content[i].length()-4).equals("</img>")){
+                        parsableText = content[i].substring(0, content[i].length()-6);
+                        img = true;
+                    }
+                }else{
                     parsableText = content[i];
+                }
 
-                LineObject lo = new LineObject(i-1, parsableText, pad1, pad2, pad3, false);
-                lo.printLineObject(this, newView);
-                setPadding(lo);
-                lineData.add(lo);
-                formattedViewer.addView(newView);
+                // if(content[i].length() > 4 && content[i].substring(content[i].length()-4).equals("</p>"))
+                //   parsableText = content[i].substring(0, content[i].length()-4);
+                if(img){
+                    ImageView imageView = new ImageView(this);
+                    imageView.setAdjustViewBounds(true);
+                    imageView.setImageURI(myLatestImgUri);
+
+                    //formattedViewer.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+                    display = getWindowManager().getDefaultDisplay();
+                    size = new Point();
+                    display.getSize(size);
+
+                    imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,(int)(size.x*0.5)));
+                    imageView.setPadding(0,12,0,12);
+                    imageView.setId(i-1);
+                    LineObject lo = new LineObject(workingIndex, myLatestImgUri.toString(), pad1, pad2, pad3, true, true);
+                    formattedViewer.addView(imageView);
+                }else{
+                    LineObject lo = new LineObject(i-1, parsableText, pad1, pad2, pad3, false, false);
+                    lo.printLineObject(this, newView);
+                    setPadding(lo);
+                    lineData.add(lo);
+                    formattedViewer.addView(newView);
+                }
+
 
             }
         }
@@ -177,7 +205,7 @@ public class WorkActivity extends AppCompatActivity{
         currentLine = createNewTextView(workingIndex);
 
 
-        LineObject lo = new LineObject(workingIndex, "", pad1, pad2, pad3, true);
+        LineObject lo = new LineObject(workingIndex, "", pad1, pad2, pad3, true, false);
         lo.printLineObject(this, currentLine);
         setPadding(lo);
         lineData.add(lo);
@@ -226,7 +254,7 @@ public class WorkActivity extends AppCompatActivity{
                         }
                         workingIndex++;
                         currentLine = createNewTextView(workingIndex);
-                        LineObject lo = new LineObject(workingIndex, "", pad1, pad2, pad3, true);
+                        LineObject lo = new LineObject(workingIndex, "", pad1, pad2, pad3, true, false);
                         lo.printLineObject(WorkActivity.this, currentLine);
                         setPadding(lo);
                         if(workingIndex >= lineData.size()){
@@ -416,8 +444,6 @@ public class WorkActivity extends AppCompatActivity{
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             Log.d("activity result", myLatestImgUri.toString());
             ImageView imageView = new ImageView(this);
-//            imageView.setMaxHeight(myMaxImgHeight);
-//            imageView.setMaxWidth(myMaxImgWidth);
             imageView.setAdjustViewBounds(true);
             imageView.setImageURI(myLatestImgUri);
 
@@ -429,7 +455,27 @@ public class WorkActivity extends AppCompatActivity{
 
             imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,(int)(size.x*0.5)));
             imageView.setPadding(0,12,0,12);
-            formattedViewer.addView(imageView, workingIndex);
+
+
+
+            for(int i = lineData.size()-1; i > workingIndex; i--){// insert id in between
+                findViewById(i).setId(i+1);
+            }
+            workingIndex++;
+            imageView.setId(workingIndex);
+
+            currentLine = findViewById(workingIndex+1);
+            LineObject lo = new LineObject(workingIndex, myLatestImgUri.toString(), pad1, pad2, pad3, true, true);
+
+            if(workingIndex >= lineData.size()){
+                lineData.add(lo);
+                formattedViewer.addView(imageView);
+            }else{
+                lineData.add(workingIndex, lo);
+                formattedViewer.addView(imageView, workingIndex);
+            }
+
+
         }
     }
 
@@ -512,14 +558,15 @@ public class WorkActivity extends AppCompatActivity{
     }
 
     private void formatLines(int startIndex){
-        if(startIndex > 0)
-            setPadding(lineData.get(startIndex-1));
-        else
+        //if(startIndex > 0)
+         //   setPadding(lineData.get(startIndex-1));
+        //else
             setPadding(null);
-        for(int i = startIndex; i < lineData.size(); i++){
+        for(int i = 0; i < lineData.size(); i++){
 
             TextView newView = (TextView) findViewById(i);
             LineObject lo = lineData.get(i);
+            lo.setPadding(pad1, pad2, pad3);
             lo.printLineObject(this, newView);
             setPadding(lo);
         }

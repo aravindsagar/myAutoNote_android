@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.text.Html;
+import android.util.Log;
 import android.widget.TextView;
 
 import paradigm.shift.myautonote.R;
@@ -19,6 +20,7 @@ public class LineObject {
     public int index;
     public String content;
     public int headerSize = 0;
+    public int manualHeaderSize = 0;
     public int vocab = -1;
 
     public int pad1 = 0;
@@ -27,7 +29,7 @@ public class LineObject {
 
     public boolean working = false;
 
-    public LineObject(int idx, String c, int p1, int p2, int p3, Boolean w){
+    public LineObject(int idx, String c, int p1, int p2, int p3, Boolean w, Boolean it){
         index = idx;
         content = c;
 
@@ -37,6 +39,9 @@ public class LineObject {
         pad3 = p3;
 
         working = w;
+        imageType = it;
+
+        isHeader();
     }
 
     public void copyPaddingFromPreviousLine(LineObject other){
@@ -66,11 +71,18 @@ public class LineObject {
 
 
     public void printLineObject(Context context, TextView output){
-        headerSize = 0;
+        Log.d("Line: " + index, manualHeaderSize + "");
         vocab = -1;
 
-        isHeader();
-        isTitle();
+
+
+        if(manualHeaderSize <= 0){
+            headerSize = 0;
+            isTitle();
+        }else{
+            headerSize = manualHeaderSize;
+        }
+
 
 
         //valueTV.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary));
@@ -127,11 +139,11 @@ public class LineObject {
         int paddingLeft = 0;
         int paddingTop = 0;
         if(headerSize > 0){
-            if(headerSize != 4)
-                paddingLeft += pad3;
             if(headerSize != 3)
-                paddingLeft += pad2;
+                paddingLeft += pad3;
             if(headerSize != 2)
+                paddingLeft += pad2;
+            if(headerSize != 1)
                 paddingLeft += pad1;
             paddingTop = 50;
         }else
@@ -156,7 +168,10 @@ public class LineObject {
         content = content.substring(0, content.length()-hs);
         if(hs > 6)
             hs =  6;
-        headerSize = hs;
+
+            headerSize = hs;
+            if(headerSize > 0)
+        manualHeaderSize = hs;
     }
 
 
@@ -184,7 +199,7 @@ public class LineObject {
                         headerSize = 2;
 
                 }else
-                    headerSize = 3;
+                    headerSize = 2;
 
 
 
@@ -211,11 +226,18 @@ public class LineObject {
     }
 
     public String toString(){
-        String result = "<p>" + content;
-        for(int i = 0; i < headerSize; i++){
-            result+="`";
+        if(imageType){
+            String result = "<p>" + content;
+
+            return result + "</img>";
+        }else{
+            String result = "<p>" + content;
+            for(int i = 0; i < headerSize; i++){
+                result+="`";
+            }
+            return result + "</p>";
         }
-        return result + "</p>";
+
     }
 }
 
