@@ -6,6 +6,7 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import android.text.Editable;
 import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -80,6 +82,7 @@ public class WorkActivity extends AppCompatActivity{
     private DataWriter dataWriter;
     private LinearLayout headerSelectView;
     private View closeHeaderSelect;
+    private float textViewHeight;
 
     //image stuff
     private static final int CAMERA_REQUEST=1;
@@ -89,6 +92,9 @@ public class WorkActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_work);
+
+        Resources r = getResources();
+        textViewHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, r.getDisplayMetrics());
 
         String[] curPath = getIntent().getStringArrayExtra(CUR_DIR);
         Directory dir = DataReader.getInstance(this).getTopDir();
@@ -124,11 +130,7 @@ public class WorkActivity extends AppCompatActivity{
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    save(titleEditor.getText().toString());
-                    myNoteName = titleEditor.getText().toString();
-                    titleView.setText(myNoteName);
-                    titleEditor.setVisibility(View.GONE);
-                    titleView.setVisibility(View.VISIBLE);
+                    saveTitleEdit();
                     return true;
                 }
                 return false;
@@ -502,6 +504,8 @@ public class WorkActivity extends AppCompatActivity{
     public void onBackPressed() {
         if(headerSelectView.getVisibility() == View.VISIBLE) {
             headerButton.performClick();
+        } else if (titleEditor.getVisibility() == View.VISIBLE) {
+            saveTitleEdit();
         } else {
             super.onBackPressed();
         }
@@ -526,6 +530,7 @@ public class WorkActivity extends AppCompatActivity{
         TextView temp = new TextView(this);
         temp.setId(index);
         temp.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        temp.setMinHeight((int) textViewHeight);
         temp.setOnClickListener(onClickLineListener);
         temp.setOnTouchListener(onTouchLineListener);
         return temp;
@@ -597,6 +602,12 @@ public class WorkActivity extends AppCompatActivity{
         //Log.d("RESULT", result);
     }
 
-
+    private void saveTitleEdit() {
+        save(titleEditor.getText().toString());
+        myNoteName = titleEditor.getText().toString();
+        titleView.setText(myNoteName);
+        titleEditor.setVisibility(View.GONE);
+        titleView.setVisibility(View.VISIBLE);
+    }
 
 }
