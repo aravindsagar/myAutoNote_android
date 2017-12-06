@@ -71,7 +71,7 @@ public class LineObject {
 
 
     public void printLineObject(Context context, TextView output){
-        Log.d("Line: " + index, manualHeaderSize + "");
+//        Log.d("Line: " + index, manualHeaderSize + "");
         vocab = -1;
 
 

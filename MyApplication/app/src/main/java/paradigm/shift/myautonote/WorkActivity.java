@@ -32,6 +32,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -162,7 +163,7 @@ public class WorkActivity extends AppCompatActivity{
                 if(content[i].length() > 4){
                     if(content[i].substring(content[i].length()-4).equals("</p>")){
                         parsableText = content[i].substring(0, content[i].length()-4);
-                    }else if(content[i].substring(content[i].length()-4).equals("</img>")){
+                    }else if(content[i].substring(content[i].length()-6).equals("</img>")){
                         parsableText = content[i].substring(0, content[i].length()-6);
                         img = true;
                     }
@@ -175,6 +176,7 @@ public class WorkActivity extends AppCompatActivity{
                 if(img){
                     ImageView imageView = new ImageView(this);
                     imageView.setAdjustViewBounds(true);
+                    myLatestImgUri = Uri.parse(parsableText);
                     imageView.setImageURI(myLatestImgUri);
 
                     //formattedViewer.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -329,6 +331,14 @@ public class WorkActivity extends AppCompatActivity{
         });
 
         headerButton = findViewById(R.id.header_button);
+        ImageButton headerOption1 = (ImageButton) findViewById(R.id.headerSize_1);
+        ImageButton headerOption2 = (ImageButton) findViewById(R.id.headerSize_2);
+        ImageButton headerOption3 = (ImageButton) findViewById(R.id.headerSize_3);
+        ImageButton headerOption4 = (ImageButton) findViewById(R.id.headerSize_4);
+        headerOption1.setOnClickListener(onHeaderClickListener);
+        headerOption2.setOnClickListener(onHeaderClickListener);
+        headerOption3.setOnClickListener(onHeaderClickListener);
+        headerOption4.setOnClickListener(onHeaderClickListener);
         headerSelectView = (LinearLayout) findViewById(R.id.header_select_view);
         closeHeaderSelect = (View) findViewById(R.id.close_header_select);
 
@@ -475,6 +485,8 @@ public class WorkActivity extends AppCompatActivity{
                 formattedViewer.addView(imageView, workingIndex);
             }
 
+            save();
+
 
         }
     }
@@ -513,7 +525,8 @@ public class WorkActivity extends AppCompatActivity{
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    editor.setSelection(editorOffset);
+                    if(editorOffset < editor.getText().toString().length())
+                        editor.setSelection(editorOffset);
                     if((currentLine.getY()+currentLine.getHeight()) > (scrollView.getScrollY()+scrollView.getHeight()) || currentLine.getY() < scrollView.getScrollY()){
                         if((int)currentLine.getY() > 0)
                             scrollView.smoothScrollTo(0, (int)currentLine.getY()-scrollView.getHeight()/2);
@@ -521,6 +534,27 @@ public class WorkActivity extends AppCompatActivity{
                 }
             }, 150);
 
+        }
+    };
+
+    public View.OnClickListener onHeaderClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            switch(view.getId()){
+                case R.id.headerSize_1:
+                    lineData.get(workingIndex).manualHeaderSize = 1;
+                    break;
+                case R.id.headerSize_2:
+                    lineData.get(workingIndex).manualHeaderSize = 2;
+                    break;
+                case R.id.headerSize_3:
+                    lineData.get(workingIndex).manualHeaderSize = 3;
+                    break;
+                case R.id.headerSize_4:
+                    lineData.get(workingIndex).manualHeaderSize = 0;
+                    break;
+            }
+            formatLines(workingIndex);
         }
     };
 
@@ -563,12 +597,16 @@ public class WorkActivity extends AppCompatActivity{
         //else
             setPadding(null);
         for(int i = 0; i < lineData.size(); i++){
-
-            TextView newView = (TextView) findViewById(i);
             LineObject lo = lineData.get(i);
-            lo.setPadding(pad1, pad2, pad3);
-            lo.printLineObject(this, newView);
-            setPadding(lo);
+
+            if(!lo.imageType){
+                TextView newView = (TextView) findViewById(i);
+
+                lo.setPadding(pad1, pad2, pad3);
+                lo.printLineObject(this, newView);
+                setPadding(lo);
+            }
+
         }
 
     }

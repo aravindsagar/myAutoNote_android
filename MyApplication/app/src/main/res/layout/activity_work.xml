@@ -139,6 +139,7 @@
             android:alpha="1"
             android:src="@drawable/ic_text_select"
             android:padding="0dp"
+            android:onClick="onHeaderClickListener"
             style="@style/HeaderLevelButton"/>
 
         <ImageButton
