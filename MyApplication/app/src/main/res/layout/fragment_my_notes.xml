@@ -1,12 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    android:id="@+id/container_main"
+<android.support.design.widget.CoordinatorLayout
+    android:id="@+id/coordinator_bottom_bar"
+    android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior" tools:context="paradigm.shift.myautonote.MyNotes"
-    tools:showIn="@layout/activity_my_notes">
+    android:layout_height="match_parent" tools:context="paradigm.shift.myautonote.MyNotes">
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/parent_layout"
+        android:layout_marginBottom="@dimen/bottom_bar_height">
 
         <!-- Linear layout for 3 suggestions at top. -->
         <LinearLayout
@@ -23,7 +28,7 @@
             </Space>
             <Button
                 android:id="@+id/btn_suggestion_1"
-                style="@style/SuggestionButton" />
+                style="@style/SuggestionButton"/>
             <Space
                 android:layout_width="0dp"
                 android:layout_height="1dp"
@@ -75,4 +80,32 @@
 
 
     </LinearLayout>
-</android.support.constraint.ConstraintLayout>
+
+    <!-- Buttons at bottom -->
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/bottom_bar_height"
+    android:orientation="horizontal"
+    app:layout_behavior="paradigm.shift.myautonote.util.BottomButtonBarBehavior"
+    android:layout_gravity="bottom">
+    <Button
+        android:id="@+id/btn_new_folder"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/bottom_bar_height"
+        android:layout_weight="1"
+        style="@style/NewButton"
+        android:text="@string/new_folder"
+        android:drawableStart="@drawable/ic_action_new_folder"/>
+    <Space
+        android:layout_width="2dp"
+        android:layout_height="match_parent" />
+    <Button
+        android:id="@+id/btn_new_note"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/bottom_bar_height"
+        android:layout_weight="1"
+        android:drawableStart="@drawable/ic_action_new_file"
+        android:text="@string/new_note"
+        style="@style/NewButton" />
+    </LinearLayout>
+</android.support.design.widget.CoordinatorLayout>
