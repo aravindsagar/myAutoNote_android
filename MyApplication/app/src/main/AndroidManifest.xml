@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="paradigm.shift.myautonote">
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="18" />
 
     <application
@@ -11,7 +13,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="paradigm.shift.myautonote.fileprovider"
@@ -21,7 +22,8 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-        <provider android:name=".util.MySuggestionsProvider"
+        <provider
+            android:name=".util.MySuggestionsProvider"
             android:authorities="paradigm.shift.myautonote.util.MySuggestionsProvider" />
 
         <activity
@@ -31,26 +33,32 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <meta-data android:name="android.app.default_searchable"
+
+            <meta-data
+                android:name="android.app.default_searchable"
                 android:value=".SearchActivity" />
         </activity>
-
         <activity
             android:name=".WorkActivity"
             android:parentActivityName=".MyNotes"
             android:theme="@style/AppTheme.NoActionBar" />
-
-        <activity android:name=".SearchActivity"
+        <activity
+            android:name=".SearchActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".MyNotes">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
-            <meta-data android:name="android.app.searchable"
-                android:resource="@xml/searchable"/>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
+        <activity android:name=".IntroActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

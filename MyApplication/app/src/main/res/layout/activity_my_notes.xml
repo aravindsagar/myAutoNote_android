@@ -11,6 +11,31 @@
     <android.support.design.widget.NavigationView android:id="@+id/nav_view"
         android:layout_width="wrap_content" android:layout_height="match_parent"
         android:layout_gravity="start" android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_header_my_notes" app:menu="@menu/activity_my_notes_drawer" />
+        app:headerLayout="@layout/nav_header_my_notes" app:menu="@menu/activity_my_notes_drawer" >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="bottom">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                android:alpha="0.7"/>
+
+            <TextView
+                android:id="@+id/logout"
+                android:layout_width="match_parent"
+                android:layout_height="?android:attr/listPreferredItemHeight"
+                android:drawablePadding="30dp"
+                android:drawableStart="@drawable/ic_logout"
+                android:gravity="center_vertical"
+                android:padding="12dp"
+                android:text="@string/logout"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:background="?android:attr/selectableItemBackground"/>
+        </LinearLayout>
+    </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>
