@@ -16,6 +16,7 @@ import java.util.concurrent.Executors;
 
 import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.metadata.NoteCreationTime;
+import paradigm.shift.myautonote.data_model.metadata.TrashEntry;
 import paradigm.shift.myautonote.util.MiscUtils;
 
 /**
@@ -66,10 +67,14 @@ public class DataWriter {
         // once this method returns.
     }
 
+    public void addFolder(final List<Directory> dir, final String newDirName) throws IOException, JSONException {
+        addFolder(dir, newDirName, new JSONObject());
+    }
+
     /**
      * Creates a new folder in the given destination.
      */
-    public void addFolder(final List<Directory> dir, final String newDirName) throws IOException, JSONException {
+    public void addFolder(final List<Directory> dir, final String newDirName, final JSONObject contents) throws IOException, JSONException {
         Log.d("DataWriter", "Creating new folder " + newDirName);
         File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
         JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
@@ -77,7 +82,7 @@ public class DataWriter {
         for (int i = 1; i < dir.size(); i++) {
             jDir = jDir.getJSONObject(dir.get(i).getName());
         }
-        jDir.put(newDirName, new JSONObject());
+        jDir.put(newDirName, contents);
         writeData(jsonObject.toString());
         notifyDataReader();
     }
@@ -90,14 +95,31 @@ public class DataWriter {
         File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
         JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
         JSONObject jDir = jsonObject.getJSONObject("files");
+        final StringBuilder dirStr = new StringBuilder(dir.get(0).getName() + "/");
         for (int i = 1; i < dir.size(); i++) {
             jDir = jDir.getJSONObject(dir.get(i).getName());
+            dirStr.append(dir.get(i).getName());
+            dirStr.append("/");
         }
+        dirStr.append(source);
+
+        final String srcDataStr = jDir.getString(source);
 
         if (destination != null) {
             jDir.put(destination, jDir.getJSONObject(source));
         }
         if (!source.equals(destination)) {
+            if (destination == null) {
+                // This is item deletion. Add it to trash.
+                myExecutor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        MetadataDb.getInstance(myContext).metadataDao().insertTrashEntry(
+                                new TrashEntry(dirStr.toString(), srcDataStr)
+                        );
+                    }
+                });
+            }
             jDir.remove(source);
         }
         writeData(jsonObject.toString());

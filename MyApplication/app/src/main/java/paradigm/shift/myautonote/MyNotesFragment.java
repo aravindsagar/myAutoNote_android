@@ -39,9 +39,11 @@ import paradigm.shift.myautonote.adapter.EditFinishedListener;
 import paradigm.shift.myautonote.data_model.DataItem;
 import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.File;
+import paradigm.shift.myautonote.data_model.metadata.TrashEntry;
 import paradigm.shift.myautonote.data_util.DataChangedListener;
 import paradigm.shift.myautonote.data_util.DataReader;
 import paradigm.shift.myautonote.data_util.DataWriter;
+import paradigm.shift.myautonote.data_util.MetadataDb;
 import paradigm.shift.myautonote.util.MiscUtils;
 import paradigm.shift.myautonote.util.NewNoteSuggestionsGenerator;
 
@@ -158,7 +160,10 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
     private Runnable setupSuggestions = new Runnable() {
         @Override
         public void run() {
-            final List<List<Directory>> suggestions = NewNoteSuggestionsGenerator.generateSuggestions(getContext());
+            if (getActivity() == null) {
+                return;
+            }
+            final List<List<Directory>> suggestions = NewNoteSuggestionsGenerator.generateSuggestions(getActivity());
 
             myHandler.post(new Runnable() {
                 @Override
@@ -327,41 +332,36 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
 
             case R.id.btn_delete :
                 myBottomDialog.dismiss();
-                final boolean isDir;
-                if (myDirListAdapter.getCurDir().getFile(myLastLongpressName) == null) {
-                    isDir = true;
-                } else {
-                    isDir = false;
+                try {
+                    DataWriter.getInstance(getContext()).editFolder(myDirListAdapter.getCurPath(),
+                            myLastLongpressName, null);
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                    Snackbar.make(myBottomBarCoordinatorLayout, "Error deleting item",
+                            Snackbar.LENGTH_SHORT).show();
                 }
-                if (isDir) {
-                    myDirListAdapter.getDirs().remove(myLastLongpressName);
-                } else {
-                    myDirListAdapter.getFiles().remove(myLastLongpressName);
+
+                // Store the deleted item name for enabling UNDO.
+                StringBuilder sb = new StringBuilder();
+                for (Directory d : myDirListAdapter.getCurPath()) {
+                    sb.append(d.getName());
+                    sb.append('/');
                 }
-                myDirListAdapter.notifyDataSetChanged();
-                Snackbar.make(myBottomBarCoordinatorLayout, "'" + myLastLongpressName + "' deleted",
-                        Snackbar.LENGTH_LONG)
+                sb.append(myLastLongpressName);
+                final String deletedItemFullName = sb.toString();
+
+                Snackbar.make(myBottomBarCoordinatorLayout, "'" + myLastLongpressName + "' deleted", Snackbar.LENGTH_LONG)
                         .setAction("UNDO", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                myDirListAdapter.refreshTopDir();
-                            }
-                        })
-                        .addCallback(new Snackbar.Callback() {
-                            @Override
-                            public void onDismissed(Snackbar transientBottomBar, int event) {
-                                if (event != Snackbar.Callback.DISMISS_EVENT_ACTION) {
-                                    try {
-                                        DataWriter.getInstance(getContext()).editFolder(myDirListAdapter.getCurPath(),
-                                                myLastLongpressName, null);
-                                    } catch (IOException | JSONException e) {
-                                        e.printStackTrace();
-                                        Snackbar.make(myBottomBarCoordinatorLayout, "Error deleting item",
-                                                Snackbar.LENGTH_SHORT).show();
+                                myExecutor.execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        TrashEntry entry =
+                                                MetadataDb.getInstance(getActivity()).metadataDao().loadTrashEntry(deletedItemFullName);
+                                        TrashFragment.restoreItem(entry, getContext(), myExecutor, null, myHandler);
                                     }
-                                }
-                                super.onDismissed(transientBottomBar, event);
-
+                                });
                             }
                         })
                         .show();

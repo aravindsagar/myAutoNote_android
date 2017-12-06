@@ -86,7 +86,7 @@ public class MyNotes extends AppCompatActivity
         if (myDrawer.isDrawerOpen(GravityCompat.START)) {
             myDrawer.closeDrawer(GravityCompat.START);
         } else {
-            if (myCurrentFragment instanceof MyNotesFragment && !((MyNotesFragment) myCurrentFragment).goBack()) {
+            if (!(myCurrentFragment instanceof MyNotesFragment) || !((MyNotesFragment) myCurrentFragment).goBack()) {
                 super.onBackPressed();
             }
         }
@@ -124,7 +124,7 @@ public class MyNotes extends AppCompatActivity
         if (id == R.id.nav_my_notes) {
             setCurrentFragment(MyNotesFragment.getInstance(myCurDirExtra));
         } else if (id == R.id.nav_trash) {
-
+            setCurrentFragment(new TrashFragment());
         }
 
         myDrawer.closeDrawer(GravityCompat.START);

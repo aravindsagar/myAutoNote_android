@@ -6,12 +6,13 @@ import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
 import paradigm.shift.myautonote.data_model.metadata.NoteCreationTime;
+import paradigm.shift.myautonote.data_model.metadata.TrashEntry;
 
 /**
  * Created by aravind on 12/5/17.
  */
 
-@Database(entities = {NoteCreationTime.class}, version = 1)
+@Database(entities = {NoteCreationTime.class, TrashEntry.class}, version = 1)
 public abstract class MetadataDb extends RoomDatabase {
     public static final String DB_NAME = "metadata";
 
