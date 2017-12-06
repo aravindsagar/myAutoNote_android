@@ -2,12 +2,13 @@
 <resources>
     <color name="colorPrimary">#00aced</color>
     <color name="colorPrimaryDark">#0084b4</color>
-    <color name="colorAccent2">#ddc65b0f</color>
-    <color name="colorAccent">#ddcc7d1d</color>
+    <color name="colorAccent2">#c67100</color>
+    <color name="colorAccent">#ff6f00</color>
     <color name="colorAccentDark">#7f0000</color>
     <color name="colorSuggestion">#3689a9</color>
     <color name="textHeaderColor">#1565C0</color>
     <color name="textColor">#555555</color>
     <color name="textHighlight">#fff9b5</color>
     <color name="textNoHighlight">#FFFFFF</color>
+    <color name="ic_launcher_background">#782A2A</color>
 </resources>
