@@ -11,8 +11,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import paradigm.shift.myautonote.data_model.Directory;
+import paradigm.shift.myautonote.data_model.metadata.NoteCreationTime;
+import paradigm.shift.myautonote.util.MiscUtils;
 
 /**
  * Created by aravind on 11/21/17.
@@ -23,6 +27,7 @@ public class DataWriter {
 
     private static DataWriter ourWriter;
     private final Context myContext;
+    private final Executor myExecutor = Executors.newSingleThreadExecutor();
 
     private DataWriter(Context context) {
         myContext = context;
@@ -112,7 +117,24 @@ public class DataWriter {
         }
         jDir.put(newFileName, contents);
         writeData(jsonObject.toString());
+
+        myExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                addMetaData(dir);
+            }
+        });
+
         notifyDataReader();
+    }
+
+    private void addMetaData(List<Directory> dir) {
+        MetadataDb db = MetadataDb.getInstance(myContext);
+        db.metadataDao().insertNoteCreationTime(new NoteCreationTime(
+                MiscUtils.constructFullName(dir),
+                MiscUtils.getDayOfTheWeek(),
+                MiscUtils.getSecondsSinceMidnight()
+        ));
     }
 
     /**

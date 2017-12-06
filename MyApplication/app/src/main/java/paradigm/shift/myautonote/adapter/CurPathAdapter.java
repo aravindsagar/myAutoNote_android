@@ -38,6 +38,7 @@ public class CurPathAdapter extends RecyclerView.Adapter<CurPathAdapter.ViewHold
 
     public void setDataset(final List<Directory> dataset) {
         this.myDataset = dataset;
+        notifyDataSetChanged();
     }
 
     @Override

@@ -33,6 +33,8 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import paradigm.shift.myautonote.adapter.CurPathAdapter;
 import paradigm.shift.myautonote.adapter.CurPathItemClickListener;
@@ -44,10 +46,13 @@ import paradigm.shift.myautonote.data_model.File;
 import paradigm.shift.myautonote.data_util.DataChangedListener;
 import paradigm.shift.myautonote.data_util.DataReader;
 import paradigm.shift.myautonote.data_util.DataWriter;
+import paradigm.shift.myautonote.util.MiscUtils;
+import paradigm.shift.myautonote.util.NewNoteSuggestionsGenerator;
 
 import static paradigm.shift.myautonote.WorkActivity.CUR_DIR;
 import static paradigm.shift.myautonote.WorkActivity.NOTE_CONTENT;
 import static paradigm.shift.myautonote.WorkActivity.NOTE_TITLE;
+import static paradigm.shift.myautonote.util.NewNoteSuggestionsGenerator.NUM_SUGGESTIONS;
 
 public class MyNotes extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemClickListener,
@@ -72,6 +77,7 @@ public class MyNotes extends AppCompatActivity
     private CoordinatorLayout myBottomBarCoordinatorLayout;
     private Button myNewFolderBtn;
     private Button myNewNoteBtn;
+    private Executor myExecutor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,47 +124,45 @@ public class MyNotes extends AppCompatActivity
 
         myBottomBarCoordinatorLayout = findViewById(R.id.coordinator_bottom_bar);
 
-        setupSuggestions();
+        myExecutor.execute(setupSuggestions);
     }
 
-    private void setupSuggestions() {
-        Button suggeston1 = findViewById(R.id.btn_suggestion_1),
-                suggeston2 = findViewById(R.id.btn_suggestion_2),
-                suggeston3 = findViewById(R.id.btn_suggestion_3);
+    private Runnable setupSuggestions = new Runnable() {
+        @Override
+        public void run() {
+            final List<List<Directory>> suggestions = NewNoteSuggestionsGenerator.generateSuggestions(MyNotes.this);
 
-        Directory topDir = DataReader.getInstance(this).getTopDir();
-        if (topDir.getSubdirectoryNames().size() < 3) {
-            mySuggestionsLayout.setVisibility(View.GONE);
-        } else {
-            mySuggestionsLayout.setVisibility(View.VISIBLE);
-            suggeston1.setText(topDir.getSubdirectoryNames().get(0));
-            suggeston1.setOnClickListener(new View.OnClickListener() {
+            myHandler.post(new Runnable() {
                 @Override
-                public void onClick(View v) {
-                    myDirListAdapter.itemClick(0);
-                    myNewNoteBtn.performClick();
-                }
-            });
-            suggeston2.setText(topDir.getSubdirectoryNames().get(1));
-            suggeston2.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    myDirListAdapter.itemClick(1);
-                    myNewNoteBtn.performClick();
-                }
-            });
-            suggeston3.setText(topDir.getSubdirectoryNames().get(2));
-            suggeston3.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    myDirListAdapter.itemClick(2);
-                    myNewNoteBtn.performClick();
+                public void run() {
+                    if (suggestions.size() < NUM_SUGGESTIONS) {
+                        mySuggestionsLayout.setVisibility(View.GONE);
+                        return;
+                    }
+                    final Button[] suggestionBtns = new Button[] {
+                            findViewById(R.id.btn_suggestion_1),
+                            findViewById(R.id.btn_suggestion_2),
+                            findViewById(R.id.btn_suggestion_3)
+                    };
+
+                    mySuggestionsLayout.setVisibility(View.VISIBLE);
+
+                    for (int i = 0; i < NUM_SUGGESTIONS; i++) {
+                        final List<Directory> suggestion = suggestions.get(i);
+                        // No need to show "Home/" in suggestions.
+                        suggestionBtns[i].setText(MiscUtils.constructFullName(suggestion.subList(1, suggestion.size())));
+                        suggestionBtns[i].setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                myDirListAdapter.setCurDir(suggestion);
+                                myCurPathAdapter.setDataset(suggestion);
+                            }
+                        });
+                    }
                 }
             });
         }
-
-        // TODO create a new note when user clicks any of the suggestions!
-    }
+    };
 
     /**
      * Back press should navigate to the previous folder if user is not in the top dir, else fallback
@@ -268,7 +272,7 @@ public class MyNotes extends AppCompatActivity
      */
     @Override
     public void onItemClick(List<Directory> curPath) {
-        myDirListAdapter.setCurDir(curPath.get(curPath.size()-1), curPath);
+        myDirListAdapter.setCurDir(curPath);
         setCurDirPathView();
     }
 
@@ -300,14 +304,13 @@ public class MyNotes extends AppCompatActivity
     private void setCurDirPathView() {
         if (myDirListAdapter.isInTopDir()) {
             myCurPathView.setVisibility(View.GONE);
-            setupSuggestions();
+            myExecutor.execute(setupSuggestions);
         } else {
             myCurPathView.setVisibility(View.VISIBLE);
             mySuggestionsLayout.setVisibility(View.GONE);
         }
 
         myCurPathAdapter.setDataset(myDirListAdapter.getCurPath());
-        myCurPathAdapter.notifyDataSetChanged();
     }
 
     @Override

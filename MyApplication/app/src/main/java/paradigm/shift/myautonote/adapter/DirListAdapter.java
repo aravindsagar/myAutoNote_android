@@ -73,6 +73,10 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
         notifyDataSetChanged();
     }
 
+    public void setCurDir(final List<Directory> curpath) {
+        setCurDir(curpath.get(curpath.size()-1), curpath);
+    }
+
     public void setCurDir(final Directory curDir, final List<Directory> curPath) {
         myCurPath = curPath;
         setCurDir(curDir);
