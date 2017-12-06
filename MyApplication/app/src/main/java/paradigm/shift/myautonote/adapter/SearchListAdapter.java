@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import paradigm.shift.myautonote.MyNotes;
 import paradigm.shift.myautonote.R;
 import paradigm.shift.myautonote.WorkActivity;
 import paradigm.shift.myautonote.data_model.DataItem;
@@ -110,13 +111,19 @@ public class SearchListAdapter extends BaseAdapter {
     public void itemClick(int position) {
         SearchResult result = (SearchResult) getItem(position);
         DataItem item = result.getItemPath().get(result.getItemPath().size() - 1);
-        String[] curPath = new String[result.getItemPath().size() - 1];
-        for (int i = 0; i < result.getItemPath().size() - 1; i++) {
-            curPath[i] = result.getItemPath().get(i).getName();
-        }
         if (result.isResultDir()) {
-            // TODO
+            String[] curPath = new String[result.getItemPath().size()];
+            for (int i = 0; i < result.getItemPath().size(); i++) {
+                curPath[i] = result.getItemPath().get(i).getName();
+            }
+            myContext.startActivity(new Intent(
+                    myContext, MyNotes.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra(WorkActivity.CUR_DIR, curPath)
+            );
         } else {
+            String[] curPath = new String[result.getItemPath().size() - 1];
+            for (int i = 0; i < result.getItemPath().size() - 1; i++) {
+                curPath[i] = result.getItemPath().get(i).getName();
+            }
             File f = (File) item;
             myContext.startActivity(new Intent(myContext, WorkActivity.class)
                     .putExtra(WorkActivity.NOTE_TITLE, f.getName())

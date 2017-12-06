@@ -32,6 +32,7 @@ import android.widget.ListView;
 import org.json.JSONException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -124,7 +125,37 @@ public class MyNotes extends AppCompatActivity
 
         myBottomBarCoordinatorLayout = findViewById(R.id.coordinator_bottom_bar);
 
+        String[] curDir = getIntent().getStringArrayExtra(CUR_DIR);
+        setCurDir(curDir);
+
         myExecutor.execute(setupSuggestions);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        String[] curDir = intent.getStringArrayExtra(CUR_DIR);
+        setCurDir(curDir);
+    }
+
+    private void setCurDir(String[] curDir) {
+        if (curDir == null) {
+            return;
+        }
+
+        List<Directory> dir = new ArrayList<>(curDir.length);
+        Directory topDir = DataReader.getInstance(this).getTopDir();
+        dir.add(topDir);
+        for (int i = 1; i < curDir.length; i++) {
+            topDir = topDir.getSubDirectory(curDir[i]);
+            if (topDir == null) {
+                return;
+            }
+            dir.add(topDir);
+        }
+        Log.d("MyNotes", "Setting cur dir");
+        myDirListAdapter.setCurDir(dir);
+        setCurDirPathView();
     }
 
     private Runnable setupSuggestions = new Runnable() {
@@ -145,8 +176,6 @@ public class MyNotes extends AppCompatActivity
                             findViewById(R.id.btn_suggestion_3)
                     };
 
-                    mySuggestionsLayout.setVisibility(View.VISIBLE);
-
                     for (int i = 0; i < NUM_SUGGESTIONS; i++) {
                         final List<Directory> suggestion = suggestions.get(i);
                         // No need to show "Home/" in suggestions.
@@ -155,7 +184,8 @@ public class MyNotes extends AppCompatActivity
                             @Override
                             public void onClick(View v) {
                                 myDirListAdapter.setCurDir(suggestion);
-                                myCurPathAdapter.setDataset(suggestion);
+                                setCurDirPathView();
+                                myNewNoteBtn.performClick();
                             }
                         });
                     }
@@ -304,6 +334,7 @@ public class MyNotes extends AppCompatActivity
     private void setCurDirPathView() {
         if (myDirListAdapter.isInTopDir()) {
             myCurPathView.setVisibility(View.GONE);
+            mySuggestionsLayout.setVisibility(View.VISIBLE);
             myExecutor.execute(setupSuggestions);
         } else {
             myCurPathView.setVisibility(View.VISIBLE);
