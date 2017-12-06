@@ -28,6 +28,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import org.json.JSONException;
 
@@ -49,6 +50,7 @@ import paradigm.shift.myautonote.data_util.DataReader;
 import paradigm.shift.myautonote.data_util.DataWriter;
 import paradigm.shift.myautonote.util.MiscUtils;
 import paradigm.shift.myautonote.util.NewNoteSuggestionsGenerator;
+import paradigm.shift.myautonote.util.PreferenceHelper;
 
 import static paradigm.shift.myautonote.WorkActivity.CUR_DIR;
 import static paradigm.shift.myautonote.WorkActivity.NOTE_CONTENT;
@@ -78,12 +80,22 @@ public class MyNotes extends AppCompatActivity
     private CoordinatorLayout myBottomBarCoordinatorLayout;
     private Button myNewFolderBtn;
     private Button myNewNoteBtn;
+    private TextView myUsernameView;
     private Executor myExecutor = Executors.newSingleThreadExecutor();
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        myUsernameView.setText(PreferenceHelper.getString(this, R.string.pref_key_username, "Unknown user"));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (!PreferenceHelper.getBoolean(this, R.string.pref_key_intro_done, false)) {
+            startActivity(new Intent(this, IntroActivity.class));
+        }
         myHandler = new Handler();
 
         setContentView(R.layout.activity_my_notes);
@@ -99,6 +111,7 @@ public class MyNotes extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        myUsernameView = navigationView.getHeaderView(0).findViewById(R.id.text_username);
 
         DataReader.getInstance(this).registerListener(this);
 
@@ -124,6 +137,9 @@ public class MyNotes extends AppCompatActivity
         myNewNoteBtn.setOnClickListener(this);
 
         myBottomBarCoordinatorLayout = findViewById(R.id.coordinator_bottom_bar);
+
+        TextView logoutBtn = findViewById(R.id.logout);
+        logoutBtn.setOnClickListener(this);
 
         String[] curDir = getIntent().getStringArrayExtra(CUR_DIR);
         setCurDir(curDir);
@@ -179,7 +195,11 @@ public class MyNotes extends AppCompatActivity
                     for (int i = 0; i < NUM_SUGGESTIONS; i++) {
                         final List<Directory> suggestion = suggestions.get(i);
                         // No need to show "Home/" in suggestions.
-                        suggestionBtns[i].setText(MiscUtils.constructFullName(suggestion.subList(1, suggestion.size())));
+                        if (suggestion.size() > 1) {
+                            suggestionBtns[i].setText(MiscUtils.constructFullName(suggestion.subList(1, suggestion.size())));
+                        } else {
+                            suggestionBtns[i].setText(MiscUtils.constructFullName(suggestion));
+                        }
                         suggestionBtns[i].setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -393,7 +413,7 @@ public class MyNotes extends AppCompatActivity
                 }
                 myDirListAdapter.notifyDataSetChanged();
                 Snackbar.make(myBottomBarCoordinatorLayout, "'" + myLastLongpressName + "' deleted",
-                        Snackbar.LENGTH_SHORT)
+                        Snackbar.LENGTH_LONG)
                         .setAction("UNDO", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -422,6 +442,10 @@ public class MyNotes extends AppCompatActivity
 
             case R.id.btn_move :
                 break;
+
+            case R.id.logout:
+                PreferenceHelper.remove(this, R.string.pref_key_username);
+                startActivity(new Intent(this, IntroActivity.class));
         }
 
     }
