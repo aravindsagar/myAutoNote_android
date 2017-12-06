@@ -29,7 +29,7 @@
             </Space>
             <Button
                 android:id="@+id/btn_suggestion_1"
-                style="@style/SuggestionButton"/>
+                style="@style/SuggestionButton" />
             <Space
                 android:layout_width="0dp"
                 android:layout_height="1dp"
