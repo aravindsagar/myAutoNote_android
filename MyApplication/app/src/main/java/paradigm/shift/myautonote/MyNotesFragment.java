@@ -367,7 +367,10 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
                         .show();
                 break;
 
-            case R.id.btn_move :
+            case R.id.btn_move:
+                myBottomDialog.dismiss();
+                MoveItemDialogFragment.getInstance(myDirListAdapter.getCurPathStr(), myLastLongpressName)
+                        .show(getActivity().getSupportFragmentManager(), "Move");
                 break;
         }
 
