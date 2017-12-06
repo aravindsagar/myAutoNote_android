@@ -350,7 +350,7 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
                 sb.append(myLastLongpressName);
                 final String deletedItemFullName = sb.toString();
 
-                Snackbar.make(myBottomBarCoordinatorLayout, "'" + myLastLongpressName + "' deleted", Snackbar.LENGTH_LONG)
+                Snackbar.make(myBottomBarCoordinatorLayout, "'" + myLastLongpressName + "' moved to trash", Snackbar.LENGTH_LONG)
                         .setAction("UNDO", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {

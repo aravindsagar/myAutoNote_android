@@ -9,7 +9,7 @@
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
         android:layout_margin="15dp"
-        android:alpha="0.7"/>
+        android:alpha="0.9"/>
     <TextView
         android:id="@+id/dir_list_name"
         android:layout_width="0dp"
