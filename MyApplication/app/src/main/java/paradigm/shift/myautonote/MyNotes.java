@@ -125,6 +125,8 @@ public class MyNotes extends AppCompatActivity
             setCurrentFragment(MyNotesFragment.getInstance(myCurDirExtra));
         } else if (id == R.id.nav_trash) {
             setCurrentFragment(new TrashFragment());
+        } else if (id == R.id.nav_about) {
+            setCurrentFragment(new AboutFragment());
         }
 
         myDrawer.closeDrawer(GravityCompat.START);

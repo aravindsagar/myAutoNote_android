@@ -55,6 +55,7 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
     private Handler myHandler;
     private EditText myEditableField;
     private int myEditableFocusCount = 0;
+    private boolean myShouldDimFiles = false;
 
     public DirListAdapter(final Context context) {
         myTopDir = DataReader.getInstance(context).getTopDir();
@@ -154,9 +155,15 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
         if (position < myDirs.size()) {
             item = myDirs.get(position);
             holder.imageView.setImageResource(R.drawable.ic_folder);
+            convertView.setAlpha(1.0f);
         } else {
             item = myFiles.get(position - myDirs.size());
             holder.imageView.setImageResource(R.drawable.ic_file);
+            if (myShouldDimFiles) {
+                convertView.setAlpha(0.5f);
+            } else {
+                convertView.setAlpha(1.0f);
+            }
         }
 
         if (position == myEditablePosition) {
@@ -299,5 +306,9 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
                 myFiles.set(position - myDirs.size(), value);
             }
         }
+    }
+
+    public void setShouldDimFiles(boolean shouldDimFiles) {
+        this.myShouldDimFiles = shouldDimFiles;
     }
 }

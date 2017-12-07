@@ -127,6 +127,50 @@ public class DataWriter {
     }
 
     /**
+     * Moves a data item from one folder to another.
+     */
+    public void moveItem(final String[] srcDir, final String[] dstDir, final String itemName) throws IOException, JSONException {
+        Log.d("DataWriter", "Moving item" + itemName);
+        File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
+        JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
+        JSONObject jSrcDir = jsonObject.getJSONObject("files");
+        for (int i = 1; i < srcDir.length; i++) {
+            jSrcDir = jSrcDir.getJSONObject(srcDir[i]);
+            if (jSrcDir == null) {
+                return;
+            }
+        }
+        JSONObject jDstDir = jsonObject.getJSONObject("files");
+        for (int i = 1; i < dstDir.length; i++) {
+            jDstDir = jDstDir.getJSONObject(dstDir[i]);
+            if (jDstDir == null) {
+                return;
+            }
+        }
+
+        JSONObject moveObj = null;
+        String moveObjStr = null;
+        try {
+            moveObj = jSrcDir.getJSONObject(itemName);
+        } catch (JSONException e) {
+            moveObjStr = jSrcDir.getString(itemName);
+        }
+        if (moveObj == null && moveObjStr == null) {
+            return;
+        }
+
+        if (moveObj != null) {
+            jDstDir.put(itemName, moveObj);
+        } else {
+            jDstDir.put(itemName, moveObjStr);
+        }
+
+        jSrcDir.remove(itemName);
+        writeData(jsonObject.toString());
+        notifyDataReader();
+    }
+
+    /**
      * Creates a new file in the given destination.
      */
     public void addFile(final List<Directory> dir, final String newFileName, final String contents) throws IOException, JSONException {
