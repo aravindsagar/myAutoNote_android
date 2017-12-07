@@ -481,6 +481,10 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
             imageView.setId(workingIndex);
 
             currentLine = findViewById(workingIndex+1);
+            if (currentLine == null) {
+                currentLine = createNewTextView(workingIndex+1);
+            }
+
             LineObject lo = new LineObject(workingIndex, myLatestImgUri.toString(), pad1, pad2, pad3, true, true);
 
             if(workingIndex >= lineData.size()){
