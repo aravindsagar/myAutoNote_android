@@ -11,6 +11,29 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+    <style name="WorkActivityStyle" parent="AppTheme.NoActionBar">
+        <!-- enable window content transitions -->
+        <item name="android:windowActivityTransitions">true</item>
+
+        <!-- specify shared element transitions -->
+        <!--<item name="android:windowSharedElementEnterTransition">
+            @transition/change_image_transform</item>
+        <item name="android:windowSharedElementExitTransition">
+            @transition/change_image_transform</item>-->
+    </style>
+    <style name="PhotoActivityStyle" parent="AppTheme.NoActionBar">
+        <!-- enable window content transitions -->
+        <item name="android:windowActivityTransitions">true</item>
+
+        <!-- specify shared element transitions -->
+        <!--<item name="android:windowSharedElementEnterTransition">
+            @transition/change_image_transform</item>
+        <item name="android:windowSharedElementExitTransition">
+            @transition/change_image_transform</item>-->
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@color/translucent</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
@@ -66,4 +89,6 @@
         <item name="android:foreground">?android:attr/selectableItemBackground</item>
         <item name="android:scaleType">fitCenter</item>
     </style>
+
+    <color name="translucent">#aa000000</color>
 </resources>

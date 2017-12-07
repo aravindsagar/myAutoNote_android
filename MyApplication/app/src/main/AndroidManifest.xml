@@ -44,7 +44,7 @@
         <activity
             android:name=".WorkActivity"
             android:parentActivityName=".MyNotes"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/WorkActivityStyle" />
         <activity
             android:name=".SearchActivity"
             android:launchMode="singleTop"
@@ -57,8 +57,11 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-        <activity android:name=".IntroActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".IntroActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ViewPhotoActivity"
+            android:theme="@style/PhotoActivityStyle"/>
     </application>
 
 </manifest>

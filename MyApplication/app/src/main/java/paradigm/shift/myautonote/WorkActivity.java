@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +29,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -37,6 +39,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import com.github.chrisbanes.photoview.OnPhotoTapListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,10 +53,12 @@ import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.LineObject;
 import paradigm.shift.myautonote.data_util.DataReader;
 import paradigm.shift.myautonote.data_util.DataWriter;
+import paradigm.shift.myautonote.util.UriPhotoView;
 
 import static android.provider.MediaStore.EXTRA_OUTPUT;
+import static paradigm.shift.myautonote.ViewPhotoActivity.EXTRA_URI;
 
-public class WorkActivity extends AppCompatActivity{
+public class WorkActivity extends AppCompatActivity implements OnPhotoTapListener {
 
     public static final String CUR_DIR = "cur_dir";
     public static final String NOTE_CONTENT = "note_content";
@@ -78,12 +84,14 @@ public class WorkActivity extends AppCompatActivity{
     private List<Directory> myNoteDir;
     private String myNoteName;
     private Uri myLatestImgUri;
-    private int myMaxImgHeight, myMaxImgWidth;
+    private int myImgHeight;
     private boolean dirty = false;
     private DataWriter dataWriter;
     private LinearLayout headerSelectView;
     private View closeHeaderSelect;
     private float textViewHeight;
+    private ImageView curTransitionView;
+    private Handler handler;
 
     //image stuff
     private static final int CAMERA_REQUEST=1;
@@ -92,6 +100,12 @@ public class WorkActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        getWindow().setAllowEnterTransitionOverlap(true);
+        getWindow().setAllowReturnTransitionOverlap(true);
+
+        handler = new Handler();
+
         setContentView(R.layout.activity_work);
 
         Resources r = getResources();
@@ -140,8 +154,7 @@ public class WorkActivity extends AppCompatActivity{
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        myMaxImgHeight = size.y/2;
-        myMaxImgWidth = size.x/2;
+        myImgHeight = size.x/2;
 
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -174,7 +187,7 @@ public class WorkActivity extends AppCompatActivity{
                 // if(content[i].length() > 4 && content[i].substring(content[i].length()-4).equals("</p>"))
                 //   parsableText = content[i].substring(0, content[i].length()-4);
                 if(img){
-                    ImageView imageView = new ImageView(this);
+                    UriPhotoView imageView = new UriPhotoView(this);
                     imageView.setAdjustViewBounds(true);
                     myLatestImgUri = Uri.parse(parsableText);
                     imageView.setImageURI(myLatestImgUri);
@@ -188,7 +201,9 @@ public class WorkActivity extends AppCompatActivity{
                     imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,(int)(size.x*0.5)));
                     imageView.setPadding(0,12,0,12);
                     imageView.setId(i-1);
+                    imageView.setOnPhotoTapListener(this);
                     LineObject lo = new LineObject(workingIndex, myLatestImgUri.toString(), pad1, pad2, pad3, true, true);
+                    lineData.add(lo);
                     formattedViewer.addView(imageView);
                 }else{
                     LineObject lo = new LineObject(i-1, parsableText, pad1, pad2, pad3, false, false);
@@ -219,7 +234,6 @@ public class WorkActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
 
-                final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -276,7 +290,6 @@ public class WorkActivity extends AppCompatActivity{
                         changeHeaderButtonValue(lineData.get(workingIndex).headerSize);
 
                     }
-                    final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -290,14 +303,12 @@ public class WorkActivity extends AppCompatActivity{
 
                 if(!dirty){
                     dirty = true;
-                    Handler handler1 = new Handler();
-                        handler1.postDelayed(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                save();
-                            }
-                        }, 1000);
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            save();
+                        }
+                    }, 1000);
 
                 }
 
@@ -453,20 +464,15 @@ public class WorkActivity extends AppCompatActivity{
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             Log.d("activity result", myLatestImgUri.toString());
-            ImageView imageView = new ImageView(this);
+            final UriPhotoView imageView = new UriPhotoView(this);
             imageView.setAdjustViewBounds(true);
-            imageView.setImageURI(myLatestImgUri);
 
             //formattedViewer.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-            Display display = getWindowManager().getDefaultDisplay();
-            Point size = new Point();
-            display.getSize(size);
-
-            imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,(int)(size.x*0.5)));
+            imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, myImgHeight));
+            imageView.setImageURI(myLatestImgUri);
             imageView.setPadding(0,12,0,12);
-
-
+            imageView.setOnPhotoTapListener(this);
 
             for(int i = lineData.size()-1; i > workingIndex; i--){// insert id in between
                 findViewById(i).setId(i+1);
@@ -486,8 +492,6 @@ public class WorkActivity extends AppCompatActivity{
             }
 
             save();
-
-
         }
     }
 
@@ -521,7 +525,6 @@ public class WorkActivity extends AppCompatActivity{
 
             InputMethodManager keyboard = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
             keyboard.showSoftInput(editor, 0);
-            final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -695,4 +698,29 @@ public class WorkActivity extends AppCompatActivity{
         titleView.setVisibility(View.VISIBLE);
     }
 
+    @Override
+    public void onPhotoTap(final ImageView imageView, float x, float y) {
+        if (curTransitionView != null) {
+            curTransitionView.setTransitionName(null);
+        }
+
+        int delay = 0;
+        if((imageView.getY()+imageView.getHeight()) > (scrollView.getScrollY()+scrollView.getHeight()) || imageView.getY() < scrollView.getScrollY()){
+            if((int)imageView.getY() > 0)
+                scrollView.smoothScrollTo(0, (int)imageView.getY()-imageView.getHeight()/2);
+            delay = 100;
+        }
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                String transitionName = getString(R.string.photo_transition_name);
+                imageView.setTransitionName(transitionName);
+                curTransitionView = imageView;
+                ActivityOptionsCompat options = ActivityOptionsCompat
+                        .makeSceneTransitionAnimation(WorkActivity.this, imageView, transitionName);
+                startActivity(new Intent(WorkActivity.this, ViewPhotoActivity.class)
+                        .putExtra(EXTRA_URI, ((UriPhotoView) imageView).getImgUri()), options.toBundle());
+            }
+        }, delay);
+    }
 }

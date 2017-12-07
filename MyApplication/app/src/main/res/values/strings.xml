@@ -26,4 +26,6 @@
     <string name="trash">Trash</string>
     <string name="no_items_in_trash">No items in trash</string>
     <string name="about">About</string>
+    <string name="photo_display">Photo display</string>
+    <string name="photo_transition_name">photo_transition</string>
 </resources>
