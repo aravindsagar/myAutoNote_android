@@ -53,6 +53,7 @@ import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.LineObject;
 import paradigm.shift.myautonote.data_util.DataReader;
 import paradigm.shift.myautonote.data_util.DataWriter;
+import paradigm.shift.myautonote.util.PreferenceHelper;
 import paradigm.shift.myautonote.util.UriPhotoView;
 
 import static android.provider.MediaStore.EXTRA_OUTPUT;
@@ -82,7 +83,6 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
     private EditText titleEditor;
     private List<Directory> myNoteDir;
     private String myNoteName;
-    private Uri myLatestImgUri;
     private int myImgHeight;
     private boolean dirty = false;
     private DataWriter dataWriter;
@@ -187,8 +187,8 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                 if(img){
                     UriPhotoView imageView = new UriPhotoView(this);
                     imageView.setAdjustViewBounds(true);
-                    myLatestImgUri = Uri.parse(parsableText);
-                    imageView.setImageURI(myLatestImgUri, myImgHeight);
+                    Uri imgUri = Uri.parse(parsableText);
+                    imageView.setImageURI(imgUri, myImgHeight);
 
                     //formattedViewer.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
@@ -200,7 +200,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                     imageView.setPadding(0,12,0,12);
                     imageView.setId(i-1);
                     imageView.setOnPhotoTapListener(this);
-                    LineObject lo = new LineObject(workingIndex, myLatestImgUri.toString(), pad1, pad2, pad3, true, true);
+                    LineObject lo = new LineObject(workingIndex, imgUri.toString(), pad1, pad2, pad3, true, true);
                     lineData.add(lo);
                     formattedViewer.addView(imageView);
                 }else{
@@ -332,7 +332,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                 if(f != null){
                     Uri imageURI = FileProvider.getUriForFile(WorkActivity.this.getApplicationContext(), "paradigm.shift.myautonote.fileprovider", f);
                     Log.d("uri", imageURI.toString());
-                    myLatestImgUri = imageURI;
+                    PreferenceHelper.putString(WorkActivity.this, R.string.latest_img_uri, imageURI.toString());
                     intent.putExtra(EXTRA_OUTPUT, imageURI);
                     startActivityForResult(intent, CAMERA_REQUEST);
                 }
@@ -461,14 +461,15 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-            Log.d("activity result", myLatestImgUri.toString());
+            Uri imgUri = Uri.parse(PreferenceHelper.getString(this, R.string.latest_img_uri, null));
+            Log.d("activity result", imgUri.toString());
             final UriPhotoView imageView = new UriPhotoView(this);
             imageView.setAdjustViewBounds(true);
 
             //formattedViewer.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
             imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, myImgHeight));
-            imageView.setImageURI(myLatestImgUri, myImgHeight);
+            imageView.setImageURI(imgUri, myImgHeight);
             imageView.setPadding(0,12,0,12);
             imageView.setOnPhotoTapListener(this);
 
@@ -481,7 +482,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
             workingIndex++;
             imageView.setId(workingIndex);
 
-            LineObject lo = new LineObject(workingIndex, myLatestImgUri.toString(), pad1, pad2, pad3, true, true);
+            LineObject lo = new LineObject(workingIndex, imgUri.toString(), pad1, pad2, pad3, true, true);
 
             if(workingIndex >= lineData.size()){
                 lineData.add(lo);
