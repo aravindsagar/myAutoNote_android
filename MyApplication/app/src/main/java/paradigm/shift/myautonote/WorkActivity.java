@@ -61,7 +61,6 @@ import static paradigm.shift.myautonote.ViewPhotoActivity.EXTRA_URI;
 public class WorkActivity extends AppCompatActivity implements OnPhotoTapListener {
 
     public static final String CUR_DIR = "cur_dir";
-    public static final String NOTE_CONTENT = "note_content";
     public static final String NOTE_TITLE = "note_title";
 
     private String[] content;
@@ -119,6 +118,8 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
             dir = dir.getSubDirectory(curPath[i]);
             myNoteDir.add(dir);
         }
+        myNoteName = getIntent().getStringExtra(NOTE_TITLE);
+        String givenData = dir.getFile(myNoteName).getFileContents();
 
         dataWriter = DataWriter.getInstance(WorkActivity.this);
 
@@ -127,7 +128,6 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         titleView = toolbar.findViewById(R.id.text_note_name);
         titleEditor = toolbar.findViewById(R.id.edit_note_name);
-        myNoteName = getIntent().getStringExtra(NOTE_TITLE);
         titleView.setText(myNoteName);
         titleView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,8 +162,6 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
         formattedViewer = (LinearLayout) findViewById(R.id.formatted_viewer);
         scrollView = (ScrollView) findViewById(R.id.scrollable_viewer);
 
-
-        String givenData = getIntent().getStringExtra("note_content");
         lineData = new ArrayList<>();
         if(givenData.length() > 0){
             content = givenData.split("<p>");
@@ -190,7 +188,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                     UriPhotoView imageView = new UriPhotoView(this);
                     imageView.setAdjustViewBounds(true);
                     myLatestImgUri = Uri.parse(parsableText);
-                    imageView.setImageURI(myLatestImgUri);
+                    imageView.setImageURI(myLatestImgUri, myImgHeight);
 
                     //formattedViewer.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
@@ -470,7 +468,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
             //formattedViewer.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
             imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, myImgHeight));
-            imageView.setImageURI(myLatestImgUri);
+            imageView.setImageURI(myLatestImgUri, myImgHeight);
             imageView.setPadding(0,12,0,12);
             imageView.setOnPhotoTapListener(this);
 
@@ -695,7 +693,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
         try {
             dataWriter.editFile(myNoteDir, myNoteName, destination, result);
             dirty = false;
-            //Log.d("saved", "save: ");
+            Log.d("saved", "save: ");
         }catch (Exception e){
             e.printStackTrace();
             Snackbar.make(formattedViewer, "Error saving note", Snackbar.LENGTH_SHORT).show();
@@ -736,5 +734,11 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                         .putExtra(EXTRA_URI, ((UriPhotoView) imageView).getImgUri()), options.toBundle());
             }
         }, delay);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        save();
     }
 }
