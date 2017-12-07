@@ -31,8 +31,8 @@ public class UriPhotoView extends PhotoView {
 
     @Override
     public void setImageURI(Uri uri) {
-        super.setImageURI(uri);
         myImgUri = uri;
+        super.setImageURI(uri);
     }
 
     public Uri getImgUri() {

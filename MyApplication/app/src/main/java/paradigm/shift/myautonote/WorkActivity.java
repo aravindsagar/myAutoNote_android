@@ -477,13 +477,11 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
             for(int i = lineData.size()-1; i > workingIndex; i--){// insert id in between
                 findViewById(i).setId(i+1);
             }
+
+            lineData.get(workingIndex).endWork(currentLine);
+
             workingIndex++;
             imageView.setId(workingIndex);
-
-            currentLine = findViewById(workingIndex+1);
-            if (currentLine == null) {
-                currentLine = createNewTextView(workingIndex+1);
-            }
 
             LineObject lo = new LineObject(workingIndex, myLatestImgUri.toString(), pad1, pad2, pad3, true, true);
 
@@ -494,6 +492,18 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                 lineData.add(workingIndex, lo);
                 formattedViewer.addView(imageView, workingIndex);
             }
+
+            workingIndex++;
+            TextView newCurrentLine = findViewById(workingIndex);
+            if (newCurrentLine == null) {
+                newCurrentLine = createNewTextView(workingIndex);
+                LineObject lo1 = new LineObject(workingIndex, "", pad1, pad2, pad3, true, false);
+                lo1.printLineObject(WorkActivity.this, newCurrentLine);
+                setPadding(lo1);
+                lineData.add(lo1);
+                formattedViewer.addView(newCurrentLine);
+            }
+            newCurrentLine.performClick();
 
             save();
         }
