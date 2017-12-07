@@ -20,7 +20,7 @@ public class LineObject {
     public int index;
     public String content;
     public int headerSize = 0;
-    public int manualHeaderSize = 0;
+    public int manualHeaderSize = -1;
     public int vocab = -1;
 
     public int pad1 = 0;
@@ -76,7 +76,7 @@ public class LineObject {
 
 
 
-        if(manualHeaderSize <= 0){
+        if(manualHeaderSize < 0){
             headerSize = 0;
             isTitle();
         }else{
