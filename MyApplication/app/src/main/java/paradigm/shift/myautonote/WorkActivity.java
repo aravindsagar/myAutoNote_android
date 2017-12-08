@@ -20,7 +20,6 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -612,8 +611,6 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
     public void onBackPressed() {
         if(headerSelectView.getVisibility() == View.VISIBLE) {
             headerButton.performClick();
-        } else if (titleEditor.getVisibility() == View.VISIBLE) {
-            saveTitleEdit();
         } else {
             super.onBackPressed();
         }
@@ -752,6 +749,10 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
     @Override
     protected void onPause() {
         super.onPause();
-        save();
+        if (titleEditor.getVisibility() == View.VISIBLE) {
+            saveTitleEdit();
+        } else {
+            save();
+        }
     }
 }
