@@ -20,6 +20,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.Layout;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -229,6 +230,8 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
         formattedViewer.addView(currentLine);
 
         editor = (EditText) findViewById(R.id.edit_box);
+        //editor.setInputType(InputType.TYPE_NULL);
+        //editor.setInputType(InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
         editor.setOnClickListener(new View.OnClickListener(){
 
             @Override
@@ -542,8 +545,9 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    if(editorOffset < editor.getText().toString().length())
+                    if(editorOffset <= editor.getText().toString().length())
                         editor.setSelection(editorOffset);
+
                     if((currentLine.getY()+currentLine.getHeight()) > (scrollView.getScrollY()+scrollView.getHeight()) || currentLine.getY() < scrollView.getScrollY()){
                         if((int)currentLine.getY() > 0)
                             scrollView.smoothScrollTo(0, (int)currentLine.getY()-scrollView.getHeight()/2);
@@ -586,10 +590,18 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
 
                     int x = (int)motionEvent.getX();
                     int y = (int)motionEvent.getY();
-                    editorOffset =  0;
+
                     if (layout!=null){
                         int line = layout.getLineForVertical(y);
+                        double maxX = layout.getLineWidth(line);
+                        if(x > maxX + view.getPaddingLeft()){
+                            editorOffset = layout.getText().toString().length();
+                            //editor.setSelection(editor.getText().toString().length()-1);
+                            //ditorOffset = layout.getOffsetForHorizontal(line, x-view.getPaddingLeft());
+                            return false;
+                        }
                         editorOffset = layout.getOffsetForHorizontal(line, x-view.getPaddingLeft());
+
                     }
 
             }

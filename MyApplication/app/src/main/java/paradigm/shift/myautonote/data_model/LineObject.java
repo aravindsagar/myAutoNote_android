@@ -104,38 +104,14 @@ public class LineObject {
             }
         }else {
 
-            if (headerSize > 0) {
-                color = R.color.textHeaderColor;
-                opacity = 1 - (0.1) * headerSize;
 
-                if (headerSize == 4) {
-                    //this.paddingLevel == [];
-                    //data.padding = "";
-                    pad3 = 5;
-                    pad1 = 0;
-                    pad2 = 0;
-                }
-                if (headerSize == 3) {
-                    pad2 = 3;
-                    pad1 = 0;
-                }
-                if (headerSize == 2) {
-                    pad1 = 2;
-                }
-
-                output.setTypeface(null, Typeface.BOLD);
-                output.setAlpha((float)opacity);
-            }else{
-                output.setTypeface(null, Typeface.NORMAL);
-            }
 
         }
 
         if(working){
             output.setBackgroundColor(ContextCompat.getColor(context, R.color.textHighlight));
         }
-        output.setTextColor(ContextCompat.getColor(context, color));
-        output.setTextSize(fontSizeTypes[headerSize]);
+
         int paddingLeft = 0;
         int paddingTop = 0;
         if(headerSize > 0){
@@ -148,6 +124,34 @@ public class LineObject {
             paddingTop = 50;
         }else
             paddingLeft += pad1+pad2+pad3;
+
+        if (headerSize > 0) {
+            color = R.color.textHeaderColor;
+            opacity = 1 - (0.1) * headerSize;
+
+            if (headerSize == 1) {
+                //this.paddingLevel == [];
+                //data.padding = "";
+                pad3 = 5;
+                pad1 = 0;
+                pad2 = 0;
+            }
+            if (headerSize == 2) {
+                pad2 = 3;
+                pad1 = 0;
+            }
+            if (headerSize == 3) {
+                pad1 = 2;
+            }
+
+            output.setTypeface(null, Typeface.BOLD);
+            output.setAlpha((float)opacity);
+        }else{
+            output.setTypeface(null, Typeface.NORMAL);
+        }
+
+        output.setTextColor(ContextCompat.getColor(context, color));
+        output.setTextSize(fontSizeTypes[headerSize]);
 
         output.setPadding(paddingLeft*15,paddingTop, 0, 0);
         output.setText(Html.fromHtml(content));
