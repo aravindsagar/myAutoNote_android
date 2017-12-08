@@ -217,6 +217,8 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
     @Override
     public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
         if (myState != State.NORMAL) {
+            goBack();
+            setSoftKeyboard(false);
             Log.d("MyNotes", "Not acting on press");
             return;
         }

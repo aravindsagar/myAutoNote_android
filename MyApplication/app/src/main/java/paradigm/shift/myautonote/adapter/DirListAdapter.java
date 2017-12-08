@@ -220,6 +220,7 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
 
     public void itemClick(final int position) {
         if (position == myEditablePosition) {
+            onEditorAction(myEditableField, EditorInfo.IME_ACTION_DONE, null);
             return;
         }
 
@@ -260,10 +261,10 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         Log.d("Dir list adapter", "On editor action");
-        if (actionId == EditorInfo.IME_ACTION_DONE) {
+        if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
             if (myEditFinishedListener != null) {
-                Log.d("Dir list adapter", "Calling listener with newText " + ((TextView) v).getText().toString());
-                myEditFinishedListener.onEditFinished(myEditablePosition, ((TextView) v).getText().toString());
+                Log.d("Dir list adapter", "Calling listener with newText " + v.getText().toString());
+                myEditFinishedListener.onEditFinished(myEditablePosition, v.getText().toString());
             }
             myEditablePosition = -1;
             return true;
