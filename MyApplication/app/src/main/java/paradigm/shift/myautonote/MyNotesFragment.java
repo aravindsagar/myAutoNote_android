@@ -48,7 +48,6 @@ import paradigm.shift.myautonote.util.MiscUtils;
 import paradigm.shift.myautonote.util.NewNoteSuggestionsGenerator;
 
 import static paradigm.shift.myautonote.WorkActivity.CUR_DIR;
-import static paradigm.shift.myautonote.WorkActivity.NOTE_CONTENT;
 import static paradigm.shift.myautonote.WorkActivity.NOTE_TITLE;
 import static paradigm.shift.myautonote.util.NewNoteSuggestionsGenerator.NUM_SUGGESTIONS;
 
@@ -225,7 +224,7 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
         final DataItem item = (DataItem) myDirListAdapter.getItem(position);
 
         if (!(item instanceof Directory)) {
-            startWorkActivity(item.getName(), item.toString());
+            startWorkActivity(item.getName());
             return;
         }
 
@@ -238,10 +237,9 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
         }, 100);
     }
 
-    private void startWorkActivity(final String name, final String s) {
+    private void startWorkActivity(final String name) {
         Intent intent = new Intent(getContext(), WorkActivity.class);
         intent.putExtra(NOTE_TITLE, name);
-        intent.putExtra(NOTE_CONTENT, s);
         intent.putExtra(CUR_DIR, myDirListAdapter.getCurPathStr());
 
         startActivity(intent);
@@ -314,7 +312,7 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
                 String newNoteName = getUnusedNewNoteName(myDirListAdapter.getCurDir());
                 try {
                     DataWriter.getInstance(getContext()).addFile(myDirListAdapter.getCurPath(), newNoteName, NEW_NOTE_CONTENTS);
-                    startWorkActivity(newNoteName, NEW_NOTE_CONTENTS);
+                    startWorkActivity(newNoteName);
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
                     Snackbar.make(myBottomBarCoordinatorLayout, "Error creating note", Snackbar.LENGTH_SHORT).show();

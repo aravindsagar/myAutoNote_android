@@ -1,10 +1,16 @@
 package paradigm.shift.myautonote.util;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.util.AttributeSet;
 
 import com.github.chrisbanes.photoview.PhotoView;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 /**
  * Created by aravind on 12/6/17.
@@ -29,13 +35,51 @@ public class UriPhotoView extends PhotoView {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    @Override
-    public void setImageURI(Uri uri) {
+    public void setImageURI(final Uri uri, final int imgHeight) {
         myImgUri = uri;
-        super.setImageURI(uri);
+        new ScaleImageTask(this, imgHeight).execute();
     }
 
     public Uri getImgUri() {
         return myImgUri;
+    }
+
+    private static class ScaleImageTask extends AsyncTask<Void, Void, Bitmap> {
+        private WeakReference<UriPhotoView> imageView;
+        private int imgHeight;
+
+        ScaleImageTask(UriPhotoView imageView, int imgHeight) {
+            this.imageView = new WeakReference<>(imageView);
+            this.imgHeight = imgHeight;
+        }
+
+        @Override
+        protected Bitmap doInBackground(Void... params) {
+            UriPhotoView imgView = imageView.get();
+            if (imgView == null) {
+                return null;
+            }
+            try {
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(imgView.getContext().getContentResolver(),
+                        imgView.getImgUri());
+                float scaleFactor = ((float) imgHeight)/bitmap.getHeight();
+                return Bitmap.createScaledBitmap(bitmap, (int) (bitmap.getWidth() * scaleFactor), imgHeight, false);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            if (bitmap == null) {
+                return;
+            }
+            UriPhotoView photoView = imageView.get();
+            if (photoView == null) {
+                return;
+            }
+            photoView.setImageBitmap(bitmap);
+        }
     }
 }

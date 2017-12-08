@@ -54,6 +54,7 @@ import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.LineObject;
 import paradigm.shift.myautonote.data_util.DataReader;
 import paradigm.shift.myautonote.data_util.DataWriter;
+import paradigm.shift.myautonote.util.PreferenceHelper;
 import paradigm.shift.myautonote.util.UriPhotoView;
 
 import static android.provider.MediaStore.EXTRA_OUTPUT;
@@ -62,7 +63,6 @@ import static paradigm.shift.myautonote.ViewPhotoActivity.EXTRA_URI;
 public class WorkActivity extends AppCompatActivity implements OnPhotoTapListener {
 
     public static final String CUR_DIR = "cur_dir";
-    public static final String NOTE_CONTENT = "note_content";
     public static final String NOTE_TITLE = "note_title";
 
     private String[] content;
@@ -84,7 +84,6 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
     private EditText titleEditor;
     private List<Directory> myNoteDir;
     private String myNoteName;
-    private Uri myLatestImgUri;
     private int myImgHeight;
     private boolean dirty = false;
     private DataWriter dataWriter;
@@ -120,6 +119,8 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
             dir = dir.getSubDirectory(curPath[i]);
             myNoteDir.add(dir);
         }
+        myNoteName = getIntent().getStringExtra(NOTE_TITLE);
+        String givenData = dir.getFile(myNoteName).getFileContents();
 
         dataWriter = DataWriter.getInstance(WorkActivity.this);
 
@@ -128,7 +129,6 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         titleView = toolbar.findViewById(R.id.text_note_name);
         titleEditor = toolbar.findViewById(R.id.edit_note_name);
-        myNoteName = getIntent().getStringExtra(NOTE_TITLE);
         titleView.setText(myNoteName);
         titleView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -163,8 +163,6 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
         formattedViewer = (LinearLayout) findViewById(R.id.formatted_viewer);
         scrollView = (ScrollView) findViewById(R.id.scrollable_viewer);
 
-
-        String givenData = getIntent().getStringExtra("note_content");
         lineData = new ArrayList<>();
         if(givenData.length() > 0){
             content = givenData.split("<p>");
@@ -190,8 +188,8 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                 if(img){
                     UriPhotoView imageView = new UriPhotoView(this);
                     imageView.setAdjustViewBounds(true);
-                    myLatestImgUri = Uri.parse(parsableText);
-                    imageView.setImageURI(myLatestImgUri);
+                    Uri imgUri = Uri.parse(parsableText);
+                    imageView.setImageURI(imgUri, myImgHeight);
 
                     //formattedViewer.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
@@ -203,7 +201,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                     imageView.setPadding(0,12,0,12);
                     imageView.setId(i-1);
                     imageView.setOnPhotoTapListener(this);
-                    LineObject lo = new LineObject(workingIndex, myLatestImgUri.toString(), pad1, pad2, pad3, true, true);
+                    LineObject lo = new LineObject(workingIndex, imgUri.toString(), pad1, pad2, pad3, true, true);
                     lineData.add(lo);
                     formattedViewer.addView(imageView);
                 }else{
@@ -337,7 +335,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                 if(f != null){
                     Uri imageURI = FileProvider.getUriForFile(WorkActivity.this.getApplicationContext(), "paradigm.shift.myautonote.fileprovider", f);
                     Log.d("uri", imageURI.toString());
-                    myLatestImgUri = imageURI;
+                    PreferenceHelper.putString(WorkActivity.this, R.string.latest_img_uri, imageURI.toString());
                     intent.putExtra(EXTRA_OUTPUT, imageURI);
                     startActivityForResult(intent, CAMERA_REQUEST);
                 }
@@ -466,14 +464,15 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
-            Log.d("activity result", myLatestImgUri.toString());
+            Uri imgUri = Uri.parse(PreferenceHelper.getString(this, R.string.latest_img_uri, null));
+            Log.d("activity result", imgUri.toString());
             final UriPhotoView imageView = new UriPhotoView(this);
             imageView.setAdjustViewBounds(true);
 
             //formattedViewer.addView(imageView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
             imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, myImgHeight));
-            imageView.setImageURI(myLatestImgUri);
+            imageView.setImageURI(imgUri, myImgHeight);
             imageView.setPadding(0,12,0,12);
             imageView.setOnPhotoTapListener(this);
 
@@ -486,7 +485,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
             workingIndex++;
             imageView.setId(workingIndex);
 
-            LineObject lo = new LineObject(workingIndex, myLatestImgUri.toString(), pad1, pad2, pad3, true, true);
+            LineObject lo = new LineObject(workingIndex, imgUri.toString(), pad1, pad2, pad3, true, true);
 
             if(workingIndex >= lineData.size()){
                 lineData.add(lo);
@@ -707,7 +706,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
         try {
             dataWriter.editFile(myNoteDir, myNoteName, destination, result);
             dirty = false;
-            //Log.d("saved", "save: ");
+            Log.d("saved", "save: ");
         }catch (Exception e){
             e.printStackTrace();
             Snackbar.make(formattedViewer, "Error saving note", Snackbar.LENGTH_SHORT).show();
@@ -748,5 +747,11 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                         .putExtra(EXTRA_URI, ((UriPhotoView) imageView).getImgUri()), options.toBundle());
             }
         }, delay);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        save();
     }
 }

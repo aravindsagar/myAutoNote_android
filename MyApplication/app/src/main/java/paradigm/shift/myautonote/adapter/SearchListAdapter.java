@@ -127,7 +127,6 @@ public class SearchListAdapter extends BaseAdapter {
             File f = (File) item;
             myContext.startActivity(new Intent(myContext, WorkActivity.class)
                     .putExtra(WorkActivity.NOTE_TITLE, f.getName())
-                    .putExtra(WorkActivity.NOTE_CONTENT, f.getFileContents())
                     .putExtra(WorkActivity.CUR_DIR, curPath));
         }
     }
