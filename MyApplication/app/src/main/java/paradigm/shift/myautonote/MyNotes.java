@@ -59,7 +59,7 @@ public class MyNotes extends AppCompatActivity
         myDrawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, myDrawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        myDrawer.setDrawerListener(toggle);
+        myDrawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = findViewById(R.id.nav_view);

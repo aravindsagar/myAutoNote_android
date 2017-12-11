@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 /**
+ * PhotoView which stores the URI of the displayed photo. Also does bitmap scaling.
+ *
  * Created by aravind on 12/6/17.
  */
 
@@ -31,6 +33,7 @@ public class UriPhotoView extends PhotoView {
         super(context, attr, defStyle);
     }
 
+    @SuppressWarnings("unused")
     public UriPhotoView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }

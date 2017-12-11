@@ -12,6 +12,9 @@ import paradigm.shift.myautonote.R;
 import paradigm.shift.myautonote.data_model.Directory;
 
 /**
+ * Adapter to fill in the recycler view that shows the path to current folder.
+ * Each item of the view is clickable; it'll invoke the onClick method of given
+ * CurPathItemClickListener.
  * Created by aravind on 11/21/17.
  */
 

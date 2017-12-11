@@ -63,27 +63,15 @@ public class NewNoteSuggestionsGenerator {
 
         while (suggestions.size() < NUM_SUGGESTIONS && i < noteCreationTimes.length) {
             // Skip already added dirs.
-            if (added.contains(noteCreationTimes[i].itemFullName)) {
+            if (added.contains(noteCreationTimes[i].itemDirPath)) {
                 i++;
                 continue;
             }
-            added.add(noteCreationTimes[i].itemFullName);
+            added.add(noteCreationTimes[i].itemDirPath);
 
             // Construct the dir path.
-            Directory curDir = DataReader.getInstance(context).getTopDir();
-            String[] itemDir = noteCreationTimes[i].itemFullName.split("/");
-            List<Directory> itemDirList = new ArrayList<>(itemDir.length);
-            itemDirList.add(curDir);
-            boolean isValid = true;
-            for (int j = 1; j < itemDir.length; j++) {
-                curDir = curDir.getSubDirectory(itemDir[j]);
-                if (curDir == null) {
-                    isValid = false;
-                    break;
-                }
-                itemDirList.add(curDir);
-            }
-            if (isValid) {
+            List<Directory> itemDirList = MiscUtils.getCurPathList(context, noteCreationTimes[i].itemDirPath);
+            if (itemDirList != null) {
                 suggestions.add(itemDirList);
             }
             i++;

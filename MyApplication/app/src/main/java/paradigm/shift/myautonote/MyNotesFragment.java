@@ -27,7 +27,6 @@ import android.widget.ListView;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -76,8 +75,6 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
     private Dialog myBottomDialog;
     private Handler myHandler;
     private CoordinatorLayout myBottomBarCoordinatorLayout;
-    private Button myNewFolderBtn;
-    private Button myNewNoteBtn;
     private Executor myExecutor = Executors.newSingleThreadExecutor();
 
     public MyNotesFragment() {
@@ -85,9 +82,9 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
     }
 
     public static MyNotesFragment getInstance(String[] curDir) {
-        Bundle bundle=new Bundle();
+        Bundle bundle = new Bundle();
         bundle.putStringArray(CUR_DIR, curDir);
-        MyNotesFragment fragobj=new MyNotesFragment();
+        MyNotesFragment fragobj = new MyNotesFragment();
         fragobj.setArguments(bundle);
         return fragobj;
     }
@@ -128,10 +125,11 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
         myCurPathView.setLayoutManager(mLayoutManager);
         myCurPathView.addItemDecoration(dividerItemDecoration);
 
-        myNewFolderBtn = findViewById(R.id.btn_new_folder);
-        myNewNoteBtn = findViewById(R.id.btn_new_note);
-        myNewFolderBtn.setOnClickListener(this);
-        myNewNoteBtn.setOnClickListener(this);
+        Button newFolderBtn, newNoteBtn;
+        newFolderBtn = findViewById(R.id.btn_new_folder);
+        newNoteBtn = findViewById(R.id.btn_new_note);
+        newFolderBtn.setOnClickListener(this);
+        newNoteBtn.setOnClickListener(this);
 
         myBottomBarCoordinatorLayout = findViewById(R.id.coordinator_bottom_bar);
     }
@@ -141,15 +139,9 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
             return;
         }
 
-        List<Directory> dir = new ArrayList<>(curDir.length);
-        Directory topDir = DataReader.getInstance(getActivity()).getTopDir();
-        dir.add(topDir);
-        for (int i = 1; i < curDir.length; i++) {
-            topDir = topDir.getSubDirectory(curDir[i]);
-            if (topDir == null) {
-                return;
-            }
-            dir.add(topDir);
+        List<Directory> dir = MiscUtils.getCurPathList(getContext(), curDir);
+        if (dir == null) {
+            return;
         }
         Log.d("MyNotes", "Setting cur dir");
         myDirListAdapter.setCurDir(dir);
@@ -190,7 +182,7 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
                             public void onClick(View v) {
                                 myDirListAdapter.setCurDir(suggestion);
                                 setCurDirPathView();
-                                myNewNoteBtn.performClick();
+                                startNewNote();
                             }
                         });
                     }
@@ -242,7 +234,7 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
     private void startWorkActivity(final String name) {
         Intent intent = new Intent(getContext(), WorkActivity.class);
         intent.putExtra(NOTE_TITLE, name);
-        intent.putExtra(CUR_DIR, myDirListAdapter.getCurPathStr());
+        intent.putExtra(CUR_DIR, MiscUtils.getCurPathStr(myDirListAdapter.getCurPath()));
 
         startActivity(intent);
     }
@@ -250,7 +242,6 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
     /**
      * Invoked when user selects an entry from the path view at the top. This sets the current
      * directory to the one user clicked.
-     * @param curPath
      */
     @Override
     public void onItemClick(List<Directory> curPath) {
@@ -270,14 +261,17 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
         myLastLongpressName = ((DataItem) myDirListAdapter.getItem(position)).getName();
 
         myBottomDialog = new Dialog(getActivity(), R.style.MaterialDialogSheet);
-        myBottomDialog.getWindow().setContentView(R.layout.options_pop_up);
-        myBottomDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        myBottomDialog.getWindow().setGravity(Gravity.BOTTOM);
-        myBottomDialog.findViewById(R.id.btn_rename).setOnClickListener(this);
-        myBottomDialog.findViewById(R.id.btn_move).setOnClickListener(this);
-        myBottomDialog.findViewById(R.id.btn_delete).setOnClickListener (this);
-        myBottomDialog.show();
-        return true;
+        if (myBottomDialog.getWindow() != null) {
+            myBottomDialog.getWindow().setContentView(R.layout.options_pop_up);
+            myBottomDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            myBottomDialog.getWindow().setGravity(Gravity.BOTTOM);
+            myBottomDialog.findViewById(R.id.btn_rename).setOnClickListener(this);
+            myBottomDialog.findViewById(R.id.btn_move).setOnClickListener(this);
+            myBottomDialog.findViewById(R.id.btn_delete).setOnClickListener(this);
+            myBottomDialog.show();
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -311,14 +305,7 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
                 break;
 
             case R.id.btn_new_note:
-                String newNoteName = getUnusedNewNoteName(myDirListAdapter.getCurDir());
-                try {
-                    DataWriter.getInstance(getContext()).addFile(myDirListAdapter.getCurPath(), newNoteName, NEW_NOTE_CONTENTS);
-                    startWorkActivity(newNoteName);
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
-                    Snackbar.make(myBottomBarCoordinatorLayout, "Error creating note", Snackbar.LENGTH_SHORT).show();
-                }
+                startNewNote();
                 break;
 
             case R.id.btn_rename :
@@ -369,31 +356,38 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
 
             case R.id.btn_move:
                 myBottomDialog.dismiss();
-                MoveItemDialogFragment.getInstance(myDirListAdapter.getCurPathStr(), myLastLongpressName)
+                MoveItemDialogFragment.getInstance(MiscUtils.getCurPathStr(myDirListAdapter.getCurPath()), myLastLongpressName)
                         .show(getActivity().getSupportFragmentManager(), "Move");
                 break;
         }
 
     }
 
-    private String getUnusedNewDirName(Directory d) {
-        String st = "New folder";
-        String unused = st;
-        int i = 0;
-        while (d.getSubDirectory(unused) != null) {
-            i++;
-            unused = st + " " + i;
+    private void startNewNote() {
+        String newNoteName = getUnusedNewNoteName(myDirListAdapter.getCurDir());
+        try {
+            DataWriter.getInstance(getContext()).addFile(myDirListAdapter.getCurPath(), newNoteName, NEW_NOTE_CONTENTS);
+            startWorkActivity(newNoteName);
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            Snackbar.make(myBottomBarCoordinatorLayout, "Error creating note", Snackbar.LENGTH_SHORT).show();
         }
-        return unused;
     }
 
-    private String getUnusedNewNoteName(Directory d) {
-        String st = "New Note";
-        String unused = st;
+    private String getUnusedNewDirName(final Directory d) {
+        return getUnusedName(d, "New folder");
+    }
+
+    private String getUnusedNewNoteName(final Directory d) {
+        return getUnusedName(d, "New note");
+    }
+
+    private String getUnusedName(final Directory d, final String base) {
+        String unused = base;
         int i = 0;
-        while (d.getFile(unused) != null) {
+        while (d.getFile(unused) != null || d.getFile(unused) != null) {
             i++;
-            unused = st + " " + i;
+            unused = base + " " + i;
         }
         return unused;
     }
@@ -438,11 +432,13 @@ public class MyNotesFragment extends Fragment implements AdapterView.OnItemClick
         View view = getActivity().getCurrentFocus();
         if (view != null) {
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            if (!show) {
-                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-            } else {
-                Log.d("MyNotes", "Showing soft keyboard");
-                imm.showSoftInput(view, 0);
+            if (imm != null) {
+                if (!show) {
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                } else {
+                    Log.d("MyNotes", "Showing soft keyboard");
+                    imm.showSoftInput(view, 0);
+                }
             }
         }
     }

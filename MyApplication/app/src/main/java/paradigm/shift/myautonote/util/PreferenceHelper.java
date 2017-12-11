@@ -4,9 +4,11 @@ import android.content.Context;
 import android.preference.PreferenceManager;
 
 /**
+ * Helper class to get preferences. Mainly for cleaner code while referencing strings from XML.
  * Created by aravind on 12/3/17.
  */
 
+@SuppressWarnings("unused")
 public class PreferenceHelper {
     public static boolean getBoolean(Context context, int resId, boolean defaultVal) {
         return PreferenceManager.getDefaultSharedPreferences(context)

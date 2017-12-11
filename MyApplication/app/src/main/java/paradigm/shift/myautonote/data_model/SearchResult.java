@@ -3,6 +3,8 @@ package paradigm.shift.myautonote.data_model;
 import java.util.List;
 
 /**
+ * Class representing a single search result.
+ *
  * Created by aravind on 11/29/17.
  */
 
@@ -11,7 +13,7 @@ public class SearchResult {
     private final String myMatchingText;
     private final boolean myIsResultDir;
 
-    public SearchResult(List<DataItem> itemPath, String matchingText, boolean isResultDir) {
+    SearchResult(List<DataItem> itemPath, String matchingText, boolean isResultDir) {
         this.myItemPath = itemPath;
         this.myMatchingText = matchingText;
         this.myIsResultDir = isResultDir;

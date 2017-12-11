@@ -9,12 +9,14 @@ import paradigm.shift.myautonote.data_model.metadata.NoteCreationTime;
 import paradigm.shift.myautonote.data_model.metadata.TrashEntry;
 
 /**
+ * Room db class to access metadata db.
+ *
  * Created by aravind on 12/5/17.
  */
 
 @Database(entities = {NoteCreationTime.class, TrashEntry.class}, version = 1)
 public abstract class MetadataDb extends RoomDatabase {
-    public static final String DB_NAME = "metadata";
+    private static final String DB_NAME = "metadata";
 
     public static MetadataDb getInstance(Context context) {
         return Room.databaseBuilder(context, MetadataDb.class, DB_NAME).build();

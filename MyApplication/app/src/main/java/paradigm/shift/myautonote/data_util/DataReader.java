@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,6 +22,7 @@ import static paradigm.shift.myautonote.data_util.DataWriter.DATA_FILE;
 
 /**
  * Utility class to parse a json data file and provide access to data in it.
+ * Please use application context to initialize this class (using the static method).
  * Created by aravind on 11/18/17.
  */
 
@@ -30,7 +32,7 @@ public class DataReader {
 
     private boolean myIsInvalidated = true;
     private Directory myTopDir;
-    private Context myContext;
+    private WeakReference<Context> myContext;
     private List<DataChangedListener> myListeners;
 
     private static DataReader myInstance;
@@ -38,10 +40,9 @@ public class DataReader {
     /**
      * Private constructer; use static initializer to get an instance.
      * This keeps the class a Singleton.
-     * @param context
      */
     private DataReader(final Context context) {
-        myContext = context;
+        myContext = new WeakReference<>(context.getApplicationContext());
         myListeners = new ArrayList<>(2);
     }
 
@@ -50,7 +51,7 @@ public class DataReader {
      * will be shared across all who request it.
      */
     public static DataReader getInstance(final Context context) {
-        if (myInstance == null) {
+        if (myInstance == null || myInstance.myContext.get() == null) {
             myInstance = new DataReader(context);
         }
         return myInstance;
@@ -58,7 +59,6 @@ public class DataReader {
 
     /**
      * Get A Directory object representing the root directory of our data.
-     * @return
      */
     public Directory getTopDir() {
         if (myIsInvalidated || myTopDir == null) {
@@ -80,7 +80,12 @@ public class DataReader {
     /**
      * Returns a JSONObject containing data inside our data file.
      */
-    JSONObject readDataFile(java.io.File dataFile) throws IOException, JSONException {
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    JSONObject readDataFile() throws IOException, JSONException {
+        java.io.File dataFile = new java.io.File(myContext.get().getFilesDir(), DATA_FILE);
+        if (!dataFile.exists()) {
+            return null;
+        }
 
         FileInputStream iStream = new FileInputStream(dataFile);
         int size = iStream.available();
@@ -96,22 +101,20 @@ public class DataReader {
      */
     private Directory buildDirStructure() throws IOException, JSONException {
         // Read the data file and parse it.
-        java.io.File dataFile = new java.io.File(myContext.getFilesDir(), DATA_FILE);
-        if (!dataFile.exists()) {
+        JSONObject jsonData = readDataFile();
+        if (jsonData == null) {
             // Data file not found, create a new one.
             Log.d("DataReader", "Data file not found, creating a new file.");
-            DataWriter.getInstance(myContext).createDataFile();
+            DataWriter.getInstance(myContext.get()).createDataFile();
 
             // The file should exist now.
             return buildDirStructure();
         }
-        return buildDirectory(OUR_ROOT_DIR_NAME, readDataFile(dataFile).getJSONObject("files"), null);
+        return buildDirectory(OUR_ROOT_DIR_NAME, jsonData.getJSONObject("files"), null);
     }
 
     /**
      * Returns the directory structure represented by given json object in the form of a Directory object.
-     * @param jObj
-     * @return
      */
     private static Directory buildDirectory(final String name, final JSONObject jObj, final Directory parent) {
         Map<String, Directory> childDirs = new HashMap<>();

@@ -22,16 +22,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.metadata.TrashEntry;
-import paradigm.shift.myautonote.data_util.DataReader;
 import paradigm.shift.myautonote.data_util.DataWriter;
 import paradigm.shift.myautonote.data_util.MetadataDb;
+import paradigm.shift.myautonote.util.MiscUtils;
 
 
 /**
@@ -44,7 +43,6 @@ public class TrashFragment extends Fragment implements AdapterView.OnItemLongCli
     private TrashEntry[] myData;
     private ListView myListView;
     private TextView myTextView;
-    private ArrayAdapter<TrashEntry> myAdapter;
 
     public TrashFragment() {
         // Required empty public constructor
@@ -76,7 +74,7 @@ public class TrashFragment extends Fragment implements AdapterView.OnItemLongCli
             if (myData.length > 0) {
                 myTextView.setVisibility(View.GONE);
                 myListView.setVisibility(View.VISIBLE);
-                myAdapter = new ArrayAdapter<>(getContext(), R.layout.list_item_trash, myData);
+                ArrayAdapter<TrashEntry> myAdapter = new ArrayAdapter<>(getContext(), R.layout.list_item_trash, myData);
                 myListView.setAdapter(myAdapter);
                 myListView.setOnItemLongClickListener(TrashFragment.this);
             } else {
@@ -157,17 +155,7 @@ public class TrashFragment extends Fragment implements AdapterView.OnItemLongCli
             public void run() {
                 MetadataDb.getInstance(context).metadataDao().deleteTrashEntry(entry);
                 final String[] dirParts = entry.fullName.split("/");
-                final List<Directory> dir = new ArrayList<>(dirParts.length - 1);
-                Directory curDir = DataReader.getInstance(context).getTopDir();
-                dir.add(curDir);
-                for (int i = 1; i < dirParts.length-1; i++) {
-                    curDir = curDir.getSubDirectory(dirParts[i]);
-                    if (curDir == null) {
-                        // TODO create directory instead.
-                        return;
-                    }
-                    dir.add(curDir);
-                }
+                final List<Directory> dir = MiscUtils.getCurPathList(context, dirParts, false);
                 JSONObject trashObj = null;
                 try {
                     trashObj = new JSONObject(entry.data);

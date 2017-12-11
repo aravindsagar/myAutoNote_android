@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">MyAutoNote</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -29,4 +29,7 @@
     <string name="photo_display">Photo display</string>
     <string name="photo_transition_name">photo_transition</string>
     <string name="latest_img_uri">latest_img_uri</string>
+    <string name="new_line">new line</string>
+    <string name="move_item">Move <xliff:g>%s</xliff:g></string>
+    <string name="search_results_title">Results for \"%s\"</string>
 </resources>

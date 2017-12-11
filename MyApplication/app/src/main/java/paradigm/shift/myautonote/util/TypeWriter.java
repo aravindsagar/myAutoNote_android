@@ -7,12 +7,14 @@ import android.view.View;
 
 
 /**
+ * TextView with type writer animation.
+ *
  * Created by aravind on 12/6/17.
  */
 
 public class TypeWriter extends android.support.v7.widget.AppCompatTextView {
 
-    public static interface OnAnimationEndListener {
+    public interface OnAnimationEndListener {
         void onAnimationEnd(View v);
     }
 
@@ -59,6 +61,7 @@ public class TypeWriter extends android.support.v7.widget.AppCompatTextView {
         mHandler.postDelayed(characterAdder, mDelay);
     }
 
+    @SuppressWarnings("unused")
     public TypeWriter setCharacterDelay(long m) {
         mDelay = m;
         return this;

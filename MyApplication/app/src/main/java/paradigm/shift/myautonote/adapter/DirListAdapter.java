@@ -25,6 +25,7 @@ import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_util.DataReader;
 
 /**
+ * List adapter which presents the app's directory structure to the user.
  * Created by aravind on 11/19/17.
  */
 
@@ -36,7 +37,7 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
         TextView textView;
         EditText editText;
 
-        public ViewHolder(ImageView imageView, TextView textView, EditText editText) {
+        ViewHolder(ImageView imageView, TextView textView, EditText editText) {
             this.imageView = imageView;
             this.textView = textView;
             this.editText = editText;
@@ -58,29 +59,23 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
     private boolean myShouldDimFiles = false;
 
     public DirListAdapter(final Context context) {
+        // Set the top directory as the current directory.
         myTopDir = DataReader.getInstance(context).getTopDir();
-        setCurDir(myTopDir);
-        myCurPath = new ArrayList<>();
-        myCurPath.add(myTopDir);
+        List<Directory> curPath = new ArrayList<>();
+        curPath.add(myTopDir);
+        setCurDir(curPath);
+
         myInflater = LayoutInflater.from(context);
         myContext = context;
         myHandler = new Handler();
     }
 
-    private void setCurDir(final Directory curDir) {
-        myCurDir = curDir;
-        myDirs = curDir.getSubdirectoryNames();
-        myFiles = curDir.getFileNames();
-        notifyDataSetChanged();
-    }
-
-    public void setCurDir(final List<Directory> curpath) {
-        setCurDir(curpath.get(curpath.size()-1), curpath);
-    }
-
-    public void setCurDir(final Directory curDir, final List<Directory> curPath) {
+    public void setCurDir(final List<Directory> curPath) {
         myCurPath = curPath;
-        setCurDir(curDir);
+        myCurDir = curPath.get(curPath.size()-1);
+        myDirs = myCurDir.getSubdirectoryNames();
+        myFiles = myCurDir.getFileNames();
+        notifyDataSetChanged();
     }
 
     /**
@@ -91,8 +86,7 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
         Directory curDir = myTopDir;
         List<Directory> newCurPath = new ArrayList<>(myCurPath.size());
         newCurPath.add(myTopDir);
-        int i = 1;
-        for (; i < myCurPath.size(); i++) {
+        for (int i = 1; i < myCurPath.size(); i++) {
             Directory newCurDir = curDir.getSubDirectory(myCurPath.get(i).getName());
             if (newCurDir != null) {
                 curDir = newCurDir;
@@ -101,15 +95,11 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
                 break;
             }
         }
-        setCurDir(curDir, newCurPath);
+        setCurDir(newCurPath);
     }
 
     public List<String> getDirs() {
         return myDirs;
-    }
-
-    public List<String> getFiles() {
-        return myFiles;
     }
 
     public Directory getCurDir() {
@@ -183,7 +173,9 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
                         finalHolder.editText.setSelectAllOnFocus(true);
                         finalHolder.editText.requestFocus();
                         InputMethodManager imm = (InputMethodManager) myContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.showSoftInput(finalHolder.editText, 0);
+                        if (imm != null) {
+                            imm.showSoftInput(finalHolder.editText, 0);
+                        }
                         finalHolder.editText.setSelection(0, finalHolder.editText.getText().length());
                     }
                 }, 300);
@@ -210,9 +202,9 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
         if (myEditablePosition != -1 && myEditableField != null) {
             return onEditorAction(myEditableField, EditorInfo.IME_ACTION_DONE, null);
         }
-        if (myCurDir.getParent() != null) {
-            setCurDir(myCurDir.getParent());
+        if (myCurPath.size() > 1) {
             myCurPath.remove(myCurPath.size()-1);
+            setCurDir(myCurPath);
             return true;
         }
         return false;
@@ -226,9 +218,9 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
 
         final DataItem item = (DataItem) getItem(position);
         if (item instanceof Directory) {
-            setCurDir((Directory) item);
             myCurPath.add((Directory) item);
-        } // Opening Note is taken care of by MyNotes activity.
+            setCurDir(myCurPath);
+        } // Opening a note is taken care of by MyNotes activity.
     }
 
     /**
@@ -248,16 +240,6 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
         return myCurPath;
     }
 
-    public String[] getCurPathStr() {
-        String[] curPath = new String[myCurPath.size()];
-        int i = 0;
-        for (Directory d : myCurPath) {
-            curPath[i] = d.getName();
-            i++;
-        }
-        return curPath;
-    }
-
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         Log.d("Dir list adapter", "On editor action");
@@ -274,10 +256,7 @@ public class DirListAdapter extends BaseAdapter implements TextView.OnEditorActi
 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
-        if (hasFocus) {
-//            Log.d("Dir list adapter", "has focus");
-//            ((Activity) myContext).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        } else {
+        if (!hasFocus) {
             Log.d("Dir list adapter", "lost focus");
             String newText = ((TextView) v).getText().toString();
             setItemName(myEditablePosition, newText);

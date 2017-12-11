@@ -30,7 +30,7 @@ public class IntroActivity extends AppIntro2 {
             this.bgColor = bgColor;
         }
 
-        public static IntroScreen[] getIntroScreens(Context context) {
+        static IntroScreen[] getIntroScreens(Context context) {
             int bgColor = context.getResources().getColor(R.color.colorPrimary);
             return new IntroScreen[] {
                     new IntroScreen(

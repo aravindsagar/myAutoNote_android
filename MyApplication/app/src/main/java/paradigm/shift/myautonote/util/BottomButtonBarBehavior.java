@@ -8,9 +8,13 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 /**
+ * Class used to translate the bottom button bar up, when snackbar is displayed. This class is used
+ * only in xml (fragment_my_notes.xml), hence the unused warning.
+ *
  * Created by aravind on 11/28/17.
  */
 
+@SuppressWarnings("unused")
 public class BottomButtonBarBehavior extends CoordinatorLayout.Behavior<LinearLayout> {
 
     public BottomButtonBarBehavior(Context context, AttributeSet attrs) {

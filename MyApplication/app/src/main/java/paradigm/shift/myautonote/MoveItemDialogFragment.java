@@ -23,8 +23,10 @@ import paradigm.shift.myautonote.adapter.DirListAdapter;
 import paradigm.shift.myautonote.data_model.DataItem;
 import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_util.DataWriter;
+import paradigm.shift.myautonote.util.MiscUtils;
 
 /**
+ * Dialog fragment used to move items to another folder.
  * Created by aravind on 12/6/17.
  */
 
@@ -50,9 +52,9 @@ public class MoveItemDialogFragment extends DialogFragment implements DialogInte
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        View dialogView = getActivity().getLayoutInflater().inflate(R.layout.dialog_move_item, null);
+        View dialogView = View.inflate(getContext(), R.layout.dialog_move_item, null);
         TextView tv = dialogView.findViewById(R.id.dialog_title);
-        tv.setText("Move " + getArguments().getString(ITEM_NAME));
+        tv.setText(String.format(getString(R.string.move_item), getArguments().getString(ITEM_NAME)));
         myDirList = dialogView.findViewById(R.id.dir_list_dialog);
         myDirListAdapter = new DirListAdapter(getContext());
         myDirListAdapter.setShouldDimFiles(true);
@@ -74,7 +76,7 @@ public class MoveItemDialogFragment extends DialogFragment implements DialogInte
                 Log.d("Dialog", "Moving");
                 DataWriter.getInstance(getContext()).moveItem(
                         getArguments().getStringArray(ITEM_DIR),
-                        myDirListAdapter.getCurPathStr(),
+                        MiscUtils.getCurPathStr(myDirListAdapter.getCurPath()),
                         getArguments().getString(ITEM_NAME)
                 );
             } catch (IOException | JSONException e) {
@@ -89,7 +91,7 @@ public class MoveItemDialogFragment extends DialogFragment implements DialogInte
         final DataItem item = (DataItem) myDirListAdapter.getItem(position);
         if (item instanceof Directory) {
             myDirListAdapter.itemClick(position);
-            if (Arrays.equals(myDirListAdapter.getCurPathStr(), getArguments().getStringArray(ITEM_DIR))){
+            if (Arrays.equals(MiscUtils.getCurPathStr(myDirListAdapter.getCurPath()), getArguments().getStringArray(ITEM_DIR))){
                 myDirListAdapter.getDirs().remove(getArguments().getString(ITEM_NAME));
                 myDirListAdapter.notifyDataSetChanged();
             }

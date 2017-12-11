@@ -7,9 +7,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -20,22 +23,23 @@ import paradigm.shift.myautonote.data_model.metadata.TrashEntry;
 import paradigm.shift.myautonote.util.MiscUtils;
 
 /**
+ * Class to write data into our data file in json format.
  * Created by aravind on 11/21/17.
  */
 
 public class DataWriter {
-    public static final String DATA_FILE = "notes";
+    static final String DATA_FILE = "notes";
 
     private static DataWriter ourWriter;
-    private final Context myContext;
+    private final WeakReference<Context> myContext;
     private final Executor myExecutor = Executors.newSingleThreadExecutor();
 
     private DataWriter(Context context) {
-        myContext = context;
+        myContext = new WeakReference<>(context.getApplicationContext());
     }
 
     public static DataWriter getInstance(Context context) {
-        if (ourWriter == null) {
+        if (ourWriter == null || ourWriter.myContext.get() == null) {
             ourWriter = new DataWriter(context);
         }
         return ourWriter;
@@ -43,20 +47,20 @@ public class DataWriter {
 
     /**
      * Initializes our data file. Does nothing if the file already exists.
-     * @return
      */
-    public void createDataFile() throws IOException {
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    void createDataFile() throws IOException {
 
         // Initialize with dummy data for testing.
         // TODO: make this an empty json file.
-        InputStream iStream = myContext.getAssets().open("test_data.json");
+        InputStream iStream = myContext.get().getAssets().open("test_data.json");
         int size = iStream.available();
         byte[] buffer = new byte[size];
         iStream.read(buffer);
         iStream.close();
         String jsonData = new String(buffer, "UTF-8");
 
-        File outFile = new File(myContext.getFilesDir(), DATA_FILE);
+        File outFile = new File(myContext.get().getFilesDir(), DATA_FILE);
         if (outFile.createNewFile()) {
             FileOutputStream outputStream = new FileOutputStream(outFile);
             outputStream.write(jsonData.getBytes());
@@ -76,11 +80,10 @@ public class DataWriter {
      */
     public void addFolder(final List<Directory> dir, final String newDirName, final JSONObject contents) throws IOException, JSONException {
         Log.d("DataWriter", "Creating new folder " + newDirName);
-        File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
-        JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
-        JSONObject jDir = jsonObject.getJSONObject("files");
-        for (int i = 1; i < dir.size(); i++) {
-            jDir = jDir.getJSONObject(dir.get(i).getName());
+        JSONObject jsonObject = DataReader.getInstance(myContext.get()).readDataFile();
+        JSONObject jDir = traverse(jsonObject, dir);
+        if (jDir == null) {
+            throw new FileNotFoundException();
         }
         jDir.put(newDirName, contents);
         writeData(jsonObject.toString());
@@ -92,8 +95,7 @@ public class DataWriter {
      */
     public void editFolder(final List<Directory> dir, final String source, final String destination) throws IOException, JSONException {
         Log.d("DataWriter", "Renaming folder " + source);
-        File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
-        JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
+        JSONObject jsonObject = DataReader.getInstance(myContext.get()).readDataFile();
         JSONObject jDir = jsonObject.getJSONObject("files");
         final StringBuilder dirStr = new StringBuilder(dir.get(0).getName() + "/");
         for (int i = 1; i < dir.size(); i++) {
@@ -114,7 +116,7 @@ public class DataWriter {
                 myExecutor.execute(new Runnable() {
                     @Override
                     public void run() {
-                        MetadataDb.getInstance(myContext).metadataDao().insertTrashEntry(
+                        MetadataDb.getInstance(myContext.get()).metadataDao().insertTrashEntry(
                                 new TrashEntry(dirStr.toString(), srcDataStr)
                         );
                     }
@@ -131,8 +133,11 @@ public class DataWriter {
      */
     public void moveItem(final String[] srcDir, final String[] dstDir, final String itemName) throws IOException, JSONException {
         Log.d("DataWriter", "Moving item" + itemName);
-        File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
-        JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
+        if(Arrays.equals(srcDir, dstDir)) {
+            return;
+        }
+
+        JSONObject jsonObject = DataReader.getInstance(myContext.get()).readDataFile();
         JSONObject jSrcDir = jsonObject.getJSONObject("files");
         for (int i = 1; i < srcDir.length; i++) {
             jSrcDir = jSrcDir.getJSONObject(srcDir[i]);
@@ -175,11 +180,10 @@ public class DataWriter {
      */
     public void addFile(final List<Directory> dir, final String newFileName, final String contents) throws IOException, JSONException {
         Log.d("DataWriter", "Creating new folder " + newFileName);
-        File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
-        JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
-        JSONObject jDir = jsonObject.getJSONObject("files");
-        for (int i = 1; i < dir.size(); i++) {
-            jDir = jDir.getJSONObject(dir.get(i).getName());
+        JSONObject jsonObject = DataReader.getInstance(myContext.get()).readDataFile();
+        JSONObject jDir = traverse(jsonObject, dir);
+        if (jDir == null) {
+            throw new FileNotFoundException();
         }
         jDir.put(newFileName, contents);
         writeData(jsonObject.toString());
@@ -195,7 +199,7 @@ public class DataWriter {
     }
 
     private void addMetaData(List<Directory> dir) {
-        MetadataDb db = MetadataDb.getInstance(myContext);
+        MetadataDb db = MetadataDb.getInstance(myContext.get());
         db.metadataDao().insertNoteCreationTime(new NoteCreationTime(
                 MiscUtils.constructFullName(dir),
                 MiscUtils.getDayOfTheWeek(),
@@ -210,11 +214,10 @@ public class DataWriter {
     public void editFile(final List<Directory> dir, final String source, final String destination, final String contents)
             throws IOException, JSONException {
         Log.d("DataWriter", "Editing file " + source);
-        File dataFile = new File(myContext.getFilesDir(), DATA_FILE);
-        JSONObject jsonObject = DataReader.getInstance(myContext).readDataFile(dataFile);
-        JSONObject jDir = jsonObject.getJSONObject("files");
-        for (int i = 1; i < dir.size(); i++) {
-            jDir = jDir.getJSONObject(dir.get(i).getName());
+        JSONObject jsonObject = DataReader.getInstance(myContext.get()).readDataFile();
+        JSONObject jDir = traverse(jsonObject, dir);
+        if (jDir == null) {
+            throw new FileNotFoundException();
         }
 
         if (destination != null) {
@@ -230,13 +233,24 @@ public class DataWriter {
     }
 
     private void writeData(String data) throws IOException {
-        File outFile = new File(myContext.getFilesDir(), DATA_FILE);
+        File outFile = new File(myContext.get().getFilesDir(), DATA_FILE);
         FileOutputStream outputStream = new FileOutputStream(outFile);
         outputStream.write(data.getBytes());
         outputStream.close();
     }
 
+    private JSONObject traverse(JSONObject jObj, List<Directory> dir) throws JSONException {
+        JSONObject jDir = jObj.getJSONObject("files");
+        for (int i = 1; i < dir.size(); i++) {
+            jDir = jDir.getJSONObject(dir.get(i).getName());
+            if (jDir == null) {
+                return null;
+            }
+        }
+        return jDir;
+    }
+
     private void notifyDataReader() {
-        DataReader.getInstance(myContext).invalidateData();
+        DataReader.getInstance(myContext.get()).invalidateData();
     }
 }

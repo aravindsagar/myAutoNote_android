@@ -4,12 +4,12 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v4.content.ContextCompat;
 import android.text.Html;
-import android.util.Log;
 import android.widget.TextView;
 
 import paradigm.shift.myautonote.R;
 
 /**
+ * Class to represent a single line of a note.
  * Created by Drew on 11/20/2017.
  */
 
@@ -21,15 +21,15 @@ public class LineObject {
     public String content;
     public int headerSize = 0;
     public int manualHeaderSize = -1;
-    public int vocab = -1;
+    private int vocab = -1;
 
     public int pad1 = 0;
     public int pad2 = 0;
     public int pad3 = 0;
 
-    public boolean working = false;
+    private boolean working = false;
 
-    public LineObject(int idx, String c, int p1, int p2, int p3, Boolean w, Boolean it){
+    public LineObject(int idx, String c, int p1, int p2, int p3, boolean w, boolean it){
         index = idx;
         content = c;
 
@@ -95,17 +95,12 @@ public class LineObject {
 
 
         int color = R.color.textColor;
-        double opacity = 1;
 
         if(content.trim().length() == 0){
             if(working){
-                output.setText("new line");
+                output.setText(R.string.new_line);
                 output.setTypeface(null, Typeface.ITALIC);
             }
-        }else {
-
-
-
         }
 
         if(working){
@@ -127,7 +122,7 @@ public class LineObject {
 
         if (headerSize > 0) {
             color = R.color.textHeaderColor;
-            opacity = 1 - (0.1) * headerSize;
+            double opacity = 1 - (0.1) * headerSize;
 
             if (headerSize == 1) {
                 //this.paddingLevel == [];
@@ -182,15 +177,15 @@ public class LineObject {
     private void isTitle(){
         //console.log(nextContent);
         String[] words;
-        int score = 0;
+        int score;
 
         if(headerSize == 0 && vocab == -1){
 
             words = content.split(" ");
             score = 0;
-            for(int i = 0; i < words.length; i++){
-                if(words[i].length() > 0)
-                    score = (this.isWordUperCase(words[i])|| this.containsIntegers(words[i]) ? score+1 : score);
+            for (String word : words) {
+                if (word.length() > 0)
+                    score = (this.isWordUperCase(word) || this.containsIntegers(word) ? score + 1 : score);
             }
             if((double)score/words.length >= 0.6){
                 //if(nextIsHeader)
@@ -216,30 +211,23 @@ public class LineObject {
     }
 
     private boolean isWordUperCase(String input){
-        if(input.charAt(0) >= 65 && input.charAt(0) <=  90)
-            return true;
-        else
-            return false;
+        return input.charAt(0) >= 65 && input.charAt(0) <= 90;
     }
 
     private boolean containsIntegers(String input){
-        if(input.charAt(0) >= 48 && input.charAt(0) <=  57)
-            return true;
-        else
-            return false;
+        return input.charAt(0) >= 48 && input.charAt(0) <= 57;
     }
 
     public String toString(){
         if(imageType){
-            String result = "<p>" + content;
-
-            return result + "</img>";
+            return String.format("<p>%s</img>", content);
         }else{
-            String result = "<p>" + content;
+            StringBuilder result = new StringBuilder("<p>").append(content);
             for(int i = 0; i < headerSize; i++){
-                result+="`";
+                result.append("`");
             }
-            return result + "</p>";
+            result.append("</p>");
+            return result.toString();
         }
 
     }

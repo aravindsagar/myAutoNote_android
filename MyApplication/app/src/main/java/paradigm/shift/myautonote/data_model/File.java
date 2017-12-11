@@ -3,13 +3,14 @@ package paradigm.shift.myautonote.data_model;
 import java.util.List;
 
 /**
+ * Class represeting a note.
+ *
  * Created by aravind on 11/18/17.
  */
 
 public class File extends DataItem {
 
     private final String myFileContents;
-    private final static int MAX_SEARCH_LINE_LEN = 51;
 
     public File(final String name, final Directory parent, final String fileContents) {
         super(name, parent);
@@ -25,9 +26,11 @@ public class File extends DataItem {
         return getFileContents();
     }
 
+    @SuppressWarnings("WeakerAccess")
     public String toUnformattedString() {
         return getFileContents().replaceAll("</?(p|img)>", " ");
     }
+
     @Override
     public SearchResult search(List<DataItem> path, String query) {
         String contents = toUnformattedString();

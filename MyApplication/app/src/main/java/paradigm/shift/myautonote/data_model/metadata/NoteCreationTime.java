@@ -15,15 +15,15 @@ public class NoteCreationTime {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-    public String itemFullName;
+    public String itemDirPath;
     // 1-7
     public int dayOfWeek;
 
     // Seconds from 00:00.
     public int timeOfDay;
 
-    public NoteCreationTime(String itemFullName, int dayOfWeek, int timeOfDay) {
-        this.itemFullName = itemFullName;
+    public NoteCreationTime(String itemDirPath, int dayOfWeek, int timeOfDay) {
+        this.itemDirPath = itemDirPath;
         this.dayOfWeek = dayOfWeek;
         this.timeOfDay = timeOfDay;
     }

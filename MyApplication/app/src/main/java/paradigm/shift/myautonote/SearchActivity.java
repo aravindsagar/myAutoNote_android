@@ -25,7 +25,10 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
         // Get the intent, verify the action and get the query
         handleIntent(getIntent());
     }
@@ -40,7 +43,9 @@ public class SearchActivity extends AppCompatActivity implements AdapterView.OnI
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY).toLowerCase();
-            getSupportActionBar().setTitle("Results for \"" + query + "\"");
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle(String.format(getString(R.string.search_results_title), query));
+            }
 
             // Save this query to enable search suggestions.
             SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,

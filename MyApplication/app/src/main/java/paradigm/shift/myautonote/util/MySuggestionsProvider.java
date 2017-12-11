@@ -3,6 +3,7 @@ package paradigm.shift.myautonote.util;
 import android.content.SearchRecentSuggestionsProvider;
 
 /**
+ * Suggestions provider for our search.
  * Created by aravind on 11/29/17.
  */
 

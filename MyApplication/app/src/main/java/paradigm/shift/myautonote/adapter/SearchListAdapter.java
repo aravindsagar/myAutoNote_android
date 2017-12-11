@@ -18,8 +18,11 @@ import paradigm.shift.myautonote.WorkActivity;
 import paradigm.shift.myautonote.data_model.DataItem;
 import paradigm.shift.myautonote.data_model.File;
 import paradigm.shift.myautonote.data_model.SearchResult;
+import paradigm.shift.myautonote.util.MiscUtils;
 
 /**
+ * An adapter which populates the search results in SearchActivity.
+ *
  * Created by aravind on 11/29/17.
  */
 
@@ -30,7 +33,7 @@ public class SearchListAdapter extends BaseAdapter {
         ImageView imageView;
         TextView pathView, matchView;
 
-        public ViewHolder(ImageView imageView, TextView pathView, TextView matchView) {
+        ViewHolder(ImageView imageView, TextView pathView, TextView matchView) {
             this.imageView = imageView;
             this.pathView = pathView;
             this.matchView = matchView;
@@ -81,12 +84,7 @@ public class SearchListAdapter extends BaseAdapter {
 
         SearchResult result = (SearchResult) getItem(position);
 
-        StringBuilder pathTextBldr = new StringBuilder(result.getItemPath().size()*2);
-        for (DataItem d : result.getItemPath()) {
-            pathTextBldr.append(d.getName());
-            pathTextBldr.append('/');
-        }
-        String pathText = pathTextBldr.toString();
+        String pathText = MiscUtils.constructFullName(result.getItemPath());
         pathText = highlightText(pathText, myQuery);
 
         holder.pathView.setText(Html.fromHtml(pathText));
@@ -112,18 +110,12 @@ public class SearchListAdapter extends BaseAdapter {
         SearchResult result = (SearchResult) getItem(position);
         DataItem item = result.getItemPath().get(result.getItemPath().size() - 1);
         if (result.isResultDir()) {
-            String[] curPath = new String[result.getItemPath().size()];
-            for (int i = 0; i < result.getItemPath().size(); i++) {
-                curPath[i] = result.getItemPath().get(i).getName();
-            }
+            String[] curPath = MiscUtils.getCurPathStr(result.getItemPath());
             myContext.startActivity(new Intent(
                     myContext, MyNotes.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra(WorkActivity.CUR_DIR, curPath)
             );
         } else {
-            String[] curPath = new String[result.getItemPath().size() - 1];
-            for (int i = 0; i < result.getItemPath().size() - 1; i++) {
-                curPath[i] = result.getItemPath().get(i).getName();
-            }
+            String[] curPath = MiscUtils.getCurPathStr(result.getItemPath(), false);
             File f = (File) item;
             myContext.startActivity(new Intent(myContext, WorkActivity.class)
                     .putExtra(WorkActivity.NOTE_TITLE, f.getName())

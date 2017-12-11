@@ -10,9 +10,12 @@ import paradigm.shift.myautonote.data_model.metadata.NoteCreationTime;
 import paradigm.shift.myautonote.data_model.metadata.TrashEntry;
 
 /**
+ * Data access object for Metadata database.
+ *
  * Created by aravind on 12/5/17.
  */
 
+@SuppressWarnings("UnusedReturnValue")
 @Dao
 public interface MetadataDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)

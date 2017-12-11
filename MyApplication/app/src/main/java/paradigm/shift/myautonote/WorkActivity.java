@@ -3,6 +3,7 @@ package paradigm.shift.myautonote;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -51,8 +52,8 @@ import java.util.List;
 
 import paradigm.shift.myautonote.data_model.Directory;
 import paradigm.shift.myautonote.data_model.LineObject;
-import paradigm.shift.myautonote.data_util.DataReader;
 import paradigm.shift.myautonote.data_util.DataWriter;
+import paradigm.shift.myautonote.util.MiscUtils;
 import paradigm.shift.myautonote.util.PreferenceHelper;
 import paradigm.shift.myautonote.util.UriPhotoView;
 
@@ -64,7 +65,6 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
     public static final String CUR_DIR = "cur_dir";
     public static final String NOTE_TITLE = "note_title";
 
-    private String[] content;
     private ArrayList<LineObject> lineData;
 
     private int pad1 = 0;
@@ -111,20 +111,15 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
         textViewHeight = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, r.getDisplayMetrics());
 
         String[] curPath = getIntent().getStringArrayExtra(CUR_DIR);
-        Directory dir = DataReader.getInstance(this).getTopDir();
-        myNoteDir = new ArrayList<>();
-        myNoteDir.add(dir);
-        for (int i = 1; i < curPath.length; i++) {
-            dir = dir.getSubDirectory(curPath[i]);
-            myNoteDir.add(dir);
-        }
+        myNoteDir = MiscUtils.getCurPathList(this, curPath);
         myNoteName = getIntent().getStringExtra(NOTE_TITLE);
-        String givenData = dir.getFile(myNoteName).getFileContents();
+        String givenData = myNoteDir.get(myNoteDir.size() - 1).getFile(myNoteName).getFileContents();
 
         dataWriter = DataWriter.getInstance(WorkActivity.this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.work_toolbar);
+        Toolbar toolbar = findViewById(R.id.work_toolbar);
         setSupportActionBar(toolbar);
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         titleView = toolbar.findViewById(R.id.text_note_name);
         titleEditor = toolbar.findViewById(R.id.edit_note_name);
@@ -138,7 +133,9 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                 titleEditor.setVisibility(View.VISIBLE);
                 titleEditor.requestFocus();
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(titleEditor, 0);
+                if (imm != null) {
+                    imm.showSoftInput(titleEditor, 0);
+                }
             }
         });
         titleEditor.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -159,12 +156,12 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
 
-        formattedViewer = (LinearLayout) findViewById(R.id.formatted_viewer);
-        scrollView = (ScrollView) findViewById(R.id.scrollable_viewer);
+        formattedViewer =  findViewById(R.id.formatted_viewer);
+        scrollView = findViewById(R.id.scrollable_viewer);
 
         lineData = new ArrayList<>();
         if(givenData.length() > 0){
-            content = givenData.split("<p>");
+            String[] content = givenData.split("<p>");
             for(int i = 1; i < content.length; i++){
 
                 TextView newView = createNewTextView(i-1);
@@ -226,7 +223,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
         lineData.add(lo);
         formattedViewer.addView(currentLine);
 
-        editor = (EditText) findViewById(R.id.edit_box);
+        editor = findViewById(R.id.edit_box);
         //editor.setInputType(InputType.TYPE_NULL);
         //editor.setInputType(InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
         editor.setOnClickListener(new View.OnClickListener(){
@@ -286,7 +283,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                         currentLine.setText(editor.getText().toString());
                         lineData.get(workingIndex).content = editor.getText().toString();
 
-                        formatLines(workingIndex);
+                        formatLines();
                         changeHeaderButtonValue(lineData.get(workingIndex).headerSize);
 
                     }
@@ -342,16 +339,16 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
         });
 
         headerButton = findViewById(R.id.header_button);
-        ImageButton headerOption1 = (ImageButton) findViewById(R.id.headerSize_1);
-        ImageButton headerOption2 = (ImageButton) findViewById(R.id.headerSize_2);
-        ImageButton headerOption3 = (ImageButton) findViewById(R.id.headerSize_3);
-        ImageButton headerOption4 = (ImageButton) findViewById(R.id.headerSize_4);
+        ImageButton headerOption1 = findViewById(R.id.headerSize_1);
+        ImageButton headerOption2 = findViewById(R.id.headerSize_2);
+        ImageButton headerOption3 = findViewById(R.id.headerSize_3);
+        ImageButton headerOption4 = findViewById(R.id.headerSize_4);
         headerOption1.setOnClickListener(onHeaderClickListener);
         headerOption2.setOnClickListener(onHeaderClickListener);
         headerOption3.setOnClickListener(onHeaderClickListener);
         headerOption4.setOnClickListener(onHeaderClickListener);
-        headerSelectView = (LinearLayout) findViewById(R.id.header_select_view);
-        closeHeaderSelect = (View) findViewById(R.id.close_header_select);
+        headerSelectView = findViewById(R.id.header_select_view);
+        closeHeaderSelect = findViewById(R.id.close_header_select);
 
         closeHeaderSelect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -415,7 +412,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                     });
                     a.start();
 
-                }else{
+                } else {
                     headerSelectView.setVisibility(View.VISIBLE);
                     ObjectAnimator a = ObjectAnimator.ofFloat(headerSelectView, "alpha", 0, 1);
                     a.setCurrentPlayTime(150);
@@ -431,11 +428,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
 
     }
 
-
-
-    //More image stuff
-    String currPath;
-
+    @SuppressLint("SimpleDateFormat")
     private File makeImageFile() throws IOException{
         Log.d("check", "a whole new world");
 
@@ -445,17 +438,12 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
 
         File imageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         Log.d("check","finished getfilesdir");
-        File image = File.createTempFile(
+
+        return File.createTempFile(
                 imageFileName,
                 ".jpg",
                 imageDir
         );
-
-        currPath = image.getAbsolutePath();
-
-        Log.d("check", currPath);
-
-        return image;
     }
 
 //Image Stuff
@@ -520,7 +508,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                 switchLine = true;
                 lineData.get(workingIndex).endWork(currentLine);
                 currentLine = lineView;
-                workingIndex = (int)lineView.getId();
+                workingIndex = lineView.getId();
                 editor.setText(lineView.getText());
                 if(workingIndex == 0)
                     lineData.get(workingIndex).copyPaddingFromPreviousLine(null);
@@ -539,7 +527,9 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
 
 
             InputMethodManager keyboard = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
-            keyboard.showSoftInput(editor, 0);
+            if (keyboard != null) {
+                keyboard.showSoftInput(editor, 0);
+            }
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -573,7 +563,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
                     lineData.get(workingIndex).manualHeaderSize = 0;
                     break;
             }
-            formatLines(workingIndex);
+            formatLines();
         }
     };
 
@@ -616,7 +606,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
         }
     }
 
-    private void formatLines(int startIndex){
+    private void formatLines(){
         //if(startIndex > 0)
          //   setPadding(lineData.get(startIndex-1));
         //else
@@ -625,7 +615,7 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
             LineObject lo = lineData.get(i);
 
             if(!lo.imageType){
-                TextView newView = (TextView) findViewById(i);
+                TextView newView = findViewById(i);
 
                 lo.setPadding(pad1, pad2, pad3);
                 lo.printLineObject(this, newView);
@@ -695,13 +685,13 @@ public class WorkActivity extends AppCompatActivity implements OnPhotoTapListene
     }
 
     private void save(final String destination){
-        String result = "";
+        StringBuilder result = new StringBuilder(lineData.size());
         for(int i = 0; i < lineData.size(); i++){
-            result += lineData.get(i).toString();
+            result.append(lineData.get(i).toString());
         }
         //dir, final String newFileName, final String contents
         try {
-            dataWriter.editFile(myNoteDir, myNoteName, destination, result);
+            dataWriter.editFile(myNoteDir, myNoteName, destination, result.toString());
             dirty = false;
             Log.d("saved", "save: ");
         }catch (Exception e){

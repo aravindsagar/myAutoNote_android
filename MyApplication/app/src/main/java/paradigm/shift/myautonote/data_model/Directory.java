@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Class representing a folder. The folder can contain sub-folders and notes inside.
+ *
  * Created by aravind on 11/18/17.
  */
 
 public class Directory extends DataItem {
 
-    Comparator<String> caseInsensitiveComparator = new Comparator<String>() {
+    private Comparator<String> caseInsensitiveComparator = new Comparator<String>() {
         @Override
         public int compare(String o1, String o2) {
             return o1.toLowerCase().compareTo(o2.toLowerCase());

@@ -9,11 +9,11 @@ import java.util.List;
 
 public abstract class DataItem {
 
-    protected final String myName;
+    final String myName;
 
-    protected final Directory myParent;
+    private final Directory myParent;
 
-    protected DataItem(final String name, final Directory parent) {
+    DataItem(final String name, final Directory parent) {
         myName = name;
         myParent = parent;
     }
