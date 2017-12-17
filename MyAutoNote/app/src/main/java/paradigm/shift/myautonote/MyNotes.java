@@ -44,6 +44,8 @@ public class MyNotes extends AppCompatActivity
 
         if (savedInstanceState == null) {
             setCurrentFragment(MyNotesFragment.getInstance(myCurDirExtra));
+        } else {
+            myIsFragmentAdded = true;
         }
     }
 
